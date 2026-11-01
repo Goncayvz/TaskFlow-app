@@ -57,24 +57,25 @@ function Analytics() {
 
   const COLORS = ["#22c55e", "#3b82f6"]
 
-  const getCompletionColor = (rate) => {
+  const getCompletionColor = (rate:number) => {
     if (rate >= 80) return "text-green-500"
     if (rate >= 50) return "text-yellow-500"
     return "text-red-500"
   }
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const
 
-  const taskByDay = {
-    Sun: 0,
-    Mon: 0,
-    Tue: 0,
-    Wed: 0,
-    Thu: 0,
-    Fri: 0,
-    Sat: 0
-  }
+type DayName = (typeof days)[number]
 
-// task.id Ã¼zerinden fake tarih Ã¼retim
+const taskByDay: Record<DayName, number> = {
+  Sun: 0,
+  Mon: 0,
+  Tue: 0,
+  Wed: 0,
+  Thu: 0,
+  Fri: 0,
+  Sat: 0
+}
+// task.id üzerinden fake tarih üretim
 stats.tasks.forEach((task) => {
   const dayIndex = new Date(task.id).getDay()
   const dayName = days[dayIndex]

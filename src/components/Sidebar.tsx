@@ -27,7 +27,7 @@ function Sidebar({ mobileOpen = false, onClose }: { mobileOpen?: boolean; onClos
   useEffect(() => {
     if (!mobileOpen) return;
 
-    const onKeyDown = (e) => {
+   const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose?.();
     };
 

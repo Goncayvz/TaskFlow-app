@@ -37,7 +37,7 @@ const SOUND_TYPES = {
   none: { label: "Sessiz (Silent)", key: "none" }
 }
 
-const formatCompletedTime = (dateString) => {
+const formatCompletedTime = (dateString:string) => {
   try {
     return new Intl.DateTimeFormat("tr-TR", {
       hour: "2-digit",
@@ -167,7 +167,7 @@ function Focus() {
     shouldPlayYoutubeRef.current = shouldPlayYoutube
   }, [shouldPlayYoutube])
 
-  const setYoutubeVolume = useCallback((volume) => {
+  const setYoutubeVolume = useCallback((volume:number) => {
     const player = ytPlayerRef.current
     if (!player) return
 
@@ -223,7 +223,7 @@ function Focus() {
       try {
         ytPlayerRef.current = new window.YT.Player(el, {
           events: {
-            onReady: (event) => {
+            onReady: (event: { target: YouTubePlayer }) => {
               ytPlayerBuiltForUrlRef.current = youtubeEmbedUrl
               setYoutubeVolume(ytVolumeRef.current)
 

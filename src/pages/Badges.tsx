@@ -1,3 +1,4 @@
+
 import { useEffect } from "react"
 import { useBadge } from "../context/BadgeContext"
 import { useNotification } from "../context/NotificationContext"
@@ -12,39 +13,77 @@ function Badges() {
     clearNotifications()
   }, [clearNotifications])
 
-
-
-
   const categories = {
-    completions: { name: "🎯 Tamamlama Seviyeleri (Completion Levels)", color: "from-blue-900 to-blue-800" },
-    speed: { name: "⚡ Hız ve Verimlilik (Speed and Efficiency)", color: "from-yellow-900 to-yellow-800" },
-    daily: { name: "☀️ Günlük Zorluklar (Daily Challenges)", color: "from-orange-900 to-orange-800" },
-    created: { name: "📋 Yaratıcılık (Creativity)", color: "from-purple-900 to-purple-800" },
-    streak: { name: "🔥 Tutarlılık (Consistency)", color: "from-red-900 to-red-800" },
-    cleanup: { name: "✨ Temizlik (Cleanup)", color: "from-green-900 to-green-800" },
-    specific: { name: "🎨 Özel Görevler (Special Tasks)", color: "from-pink-900 to-pink-800" },
-    perfect: { name: "💯 Mükemmellik (Perfection)", color: "from-indigo-900 to-indigo-800" },
-    ontime: { name: "⏰ Zaman Yönetimi (Time Management)", color: "from-cyan-900 to-cyan-800" },
-    detail: { name: "🔍 Dikkat (Attention)", color: "from-slate-900 to-slate-800" },
-    social: { name: "🦋 Sosyal (Social)", color: "from-fuchsia-900 to-fuchsia-800" },
-    setup: { name: "🚀 Başlangıç (Start)", color: "from-lime-900 to-lime-800" }
+    completions: {
+      name: "🎯 Tamamlama Seviyeleri (Completion Levels)",
+      color: "from-blue-900 to-blue-800"
+    },
+    speed: {
+      name: "⚡ Hız ve Verimlilik (Speed and Efficiency)",
+      color: "from-yellow-900 to-yellow-800"
+    },
+    daily: {
+      name: "☀️ Günlük Zorluklar (Daily Challenges)",
+      color: "from-orange-900 to-orange-800"
+    },
+    created: {
+      name: "📋 Yaratıcılık (Creativity)",
+      color: "from-purple-900 to-purple-800"
+    },
+    streak: {
+      name: "🔥 Tutarlılık (Consistency)",
+      color: "from-red-900 to-red-800"
+    },
+    cleanup: {
+      name: "✨ Temizlik (Cleanup)",
+      color: "from-green-900 to-green-800"
+    },
+    specific: {
+      name: "🎨 Özel Görevler (Special Tasks)",
+      color: "from-pink-900 to-pink-800"
+    },
+    perfect: {
+      name: "💯 Mükemmellik (Perfection)",
+      color: "from-indigo-900 to-indigo-800"
+    },
+    ontime: {
+      name: "⏰ Zaman Yönetimi (Time Management)",
+      color: "from-cyan-900 to-cyan-800"
+    },
+    detail: {
+      name: "🔍 Dikkat (Attention)",
+      color: "from-slate-900 to-slate-800"
+    },
+    social: {
+      name: "🦋 Sosyal (Social)",
+      color: "from-fuchsia-900 to-fuchsia-800"
+    },
+    setup: {
+      name: "🚀 Başlangıç (Start)",
+      color: "from-lime-900 to-lime-800"
+    }
   }
 
-  const getBadgesByCategory = (categoryKey) => {
+  const getBadgesByCategory = (categoryKey: keyof typeof categories) => {
     return BADGES.filter((b) => b.category === categoryKey)
   }
 
-  const isBadgeEarned = (badgeId) => {
+  const isBadgeEarned = (badgeId: number) => {
     return earnedBadges.some((b) => b.id === badgeId)
   }
 
   return (
     <div className="px-4 py-6 sm:p-8">
       <div className="mb-8" onClick={clearNotifications}>
-        <h1 className="mb-2 text-3xl font-bold sm:text-4xl">🏆 Rozetler (Badges)</h1>
+        <h1 className="mb-2 text-3xl font-bold sm:text-4xl">
+          🏆 Rozetler (Badges)
+        </h1>
         <p className="text-zinc-400">
           Kazanılan (Earned):{" "}
-          <span className="text-yellow-400 font-bold">{earnedBadges.length}</span> / {BADGES.length}
+          <span className="text-yellow-400 font-bold">
+            {earnedBadges.length}
+          </span>{" "}
+          / {BADGES.length}
         </p>
       </div>
 
@@ -54,7 +93,9 @@ function Badges() {
           className="mb-8 rounded-lg border border-yellow-700 bg-gradient-to-r from-yellow-900/20 to-yellow-800/20 p-4 sm:p-6"
           onClick={clearNotifications}
         >
-          <h2 className="text-xl font-bold text-yellow-400 mb-4">⭐ Kazanılan Rozetler (Earned Badges)</h2>
+          <h2 className="text-xl font-bold text-yellow-400 mb-4">
+            ⭐ Kazanılan Rozetler (Earned Badges)
+          </h2>
           <div className="flex flex-wrap gap-3">
             {earnedBadges.map((badge) => (
               <div
@@ -63,8 +104,12 @@ function Badges() {
               >
                 <span className="text-2xl">{badge.icon}</span>
                 <div>
-                  <p className="break-words font-semibold text-yellow-300">{badge.name}</p>
-                  <p className="break-words text-xs text-yellow-200">{badge.description}</p>
+                  <p className="break-words font-semibold text-yellow-300">
+                    {badge.name}
+                  </p>
+                  <p className="break-words text-xs text-yellow-200">
+                    {badge.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -75,12 +120,21 @@ function Badges() {
       {/* Kategoriye Göre Rozetler */}
       <div className="space-y-8">
         {Object.entries(categories).map(([categoryKey, categoryInfo]) => {
-          const badgesInCategory = getBadgesByCategory(categoryKey)
-          const earnedInCategory = badgesInCategory.filter((b) => isBadgeEarned(b.id))
+          const badgesInCategory = getBadgesByCategory(
+            categoryKey as keyof typeof categories
+          )
+          const earnedInCategory = badgesInCategory.filter((b) =>
+            isBadgeEarned(b.id)
+          )
 
           return (
-            <div key={categoryKey} className="rounded-lg overflow-hidden border border-zinc-800">
-              <div className={`bg-gradient-to-r ${categoryInfo.color} p-4 border-b border-zinc-700`}>
+            <div
+              key={categoryKey}
+              className="rounded-lg overflow-hidden border border-zinc-800"
+            >
+              <div
+                className={`bg-gradient-to-r ${categoryInfo.color} p-4 border-b border-zinc-700`}
+              >
                 <h3 className="flex flex-wrap items-center gap-2 text-base font-bold sm:text-lg">
                   {categoryInfo.name}
                   <span className="ml-auto text-sm bg-black/30 px-3 py-1 rounded-full">
@@ -101,13 +155,23 @@ function Badges() {
                       }`}
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <div className={`text-4xl ${isBadgeEarned(badge.id) ? "" : "grayscale"}`}>
+                        <div
+                          className={`text-4xl ${
+                            isBadgeEarned(badge.id) ? "" : "grayscale"
+                          }`}
+                        >
                           {badge.icon}
                         </div>
-                        {isBadgeEarned(badge.id) && <div className="text-yellow-400 text-xl">✓</div>}
+                        {isBadgeEarned(badge.id) && (
+                          <div className="text-yellow-400 text-xl">✓</div>
+                        )}
                       </div>
-                      <h4 className="break-words font-bold text-white">{badge.name}</h4>
-                      <p className="break-words text-sm text-zinc-400">{badge.description}</p>
+                      <h4 className="break-words font-bold text-white">
+                        {badge.name}
+                      </h4>
+                      <p className="break-words text-sm text-zinc-400">
+                        {badge.description}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -120,12 +184,20 @@ function Badges() {
       {/* İstatistikler */}
       <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
-          <h3 className="text-zinc-400 mb-2">Toplam Rozetler (Total Badges)</h3>
-          <p className="text-4xl font-bold text-yellow-400">{BADGES.length}</p>
+          <h3 className="text-zinc-400 mb-2">
+            Toplam Rozetler (Total Badges)
+          </h3>
+          <p className="text-4xl font-bold text-yellow-400">
+            {BADGES.length}
+          </p>
         </div>
         <div className="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
-          <h3 className="text-zinc-400 mb-2">Kalan Rozetler (Remaining Badges)</h3>
-          <p className="text-4xl font-bold text-blue-400">{BADGES.length - earnedBadges.length}</p>
+          <h3 className="text-zinc-400 mb-2">
+            Kalan Rozetler (Remaining Badges)
+          </h3>
+          <p className="text-4xl font-bold text-blue-400">
+            {BADGES.length - earnedBadges.length}
+          </p>
         </div>
       </div>
     </div>
@@ -133,4 +205,3 @@ function Badges() {
 }
 
 export default Badges
-
