@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest"
-import { clearNotificationsList, createNotification, removeNotificationById } from "./NotificationContext.jsx"
+﻿import { describe, expect, it } from "vitest"
+import type { Notification } from "../data/types"
+import { clearNotificationsList, createNotification, removeNotificationById } from "./NotificationContext"
 
 describe("notification helpers", () => {
   it("creates a notification with defaults", () => {
@@ -11,7 +12,7 @@ describe("notification helpers", () => {
   })
 
   it("removes a notification by id without mutating the original list", () => {
-    const notifications = [
+    const notifications: Notification[] = [
       { id: 1, message: "A", type: "info" },
       { id: 2, message: "B", type: "success" }
     ]
@@ -21,9 +22,11 @@ describe("notification helpers", () => {
   })
 
   it("clears notifications and keeps an empty list stable", () => {
-    const empty = []
+    const empty: Notification[] = []
 
     expect(clearNotificationsList([{ id: 1, message: "A", type: "info" }])).toEqual([])
     expect(clearNotificationsList(empty)).toBe(empty)
   })
 })
+
+

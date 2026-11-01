@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+﻿import { useMemo } from "react"
 import { useBadge } from "../context/BadgeContext"
 
 import {
@@ -19,7 +19,7 @@ function Analytics() {
 
   const stats = useMemo(() => {
     const savedTasks = localStorage.getItem("tasks")
-    const tasks = savedTasks ? JSON.parse(savedTasks) : []
+    const tasks: import("../data/types").Task[] = savedTasks ? JSON.parse(savedTasks) : []
     const badges = getEarnedBadgesList()
 
     const today = new Date().toDateString()
@@ -74,7 +74,7 @@ function Analytics() {
     Sat: 0
   }
 
-// task.id üzerinden fake tarih üretim
+// task.id Ã¼zerinden fake tarih Ã¼retim
 stats.tasks.forEach((task) => {
   const dayIndex = new Date(task.id).getDay()
   const dayName = days[dayIndex]
@@ -91,7 +91,7 @@ const lineData = days.map(day => ({
       {/* STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="glass-card bg-gradient-to-br from-blue-900 to-blue-800 p-6 rounded-3xl border border-white/10">
-          <h2 className="text-zinc-300 text-sm mb-2">Toplam Görev (Total Tasks)</h2>
+          <h2 className="text-zinc-300 text-sm mb-2">Toplam GÃ¶rev (Total Tasks)</h2>
           <p className="text-3xl font-bold sm:text-4xl">{stats.totalTasks}</p>
         </div>
 
@@ -106,7 +106,7 @@ const lineData = days.map(day => ({
         </div>
 
         <div className={`glass-card p-6 rounded-3xl border border-white/10 bg-gradient-to-br from-yellow-900 to-yellow-800`}>
-          <h2 className="text-zinc-300 text-sm mb-2">Başarı Oranı (Success Rate)</h2>
+          <h2 className="text-zinc-300 text-sm mb-2">BaÅŸarÄ± OranÄ± (Success Rate)</h2>
           <p className={`text-3xl font-bold sm:text-4xl ${getCompletionColor(stats.completionRate)}`}>
             {stats.completionRate}%
           </p>
@@ -115,7 +115,7 @@ const lineData = days.map(day => ({
 
       {/* PROGRESS BAR */}
       <div className="glass-card p-6 rounded-3xl border border-white/10 mb-8">
-        <h3 className="text-lg font-semibold mb-4">Genel İlerleme (Overall Progress)</h3>
+        <h3 className="text-lg font-semibold mb-4">Genel Ä°lerleme (Overall Progress)</h3>
 
         <div className="w-full bg-zinc-800 rounded-full h-6 overflow-hidden">
           <div
@@ -125,13 +125,13 @@ const lineData = days.map(day => ({
         </div>
 
         <p className="text-zinc-400 text-sm mt-3">
-          {stats.completedTasks} / {stats.totalTasks} görev tamamlandı (tasks completed)
+          {stats.completedTasks} / {stats.totalTasks} gÃ¶rev tamamlandÄ± (tasks completed)
         </p>
       </div>
 
-      {/* PIE CHART (EKLENDİ) */}
+      {/* PIE CHART (EKLENDÄ°) */}
       <div className="glass-card mb-8 rounded-3xl border border-white/10 p-5 sm:p-6">
-        <h3 className="text-lg font-semibold mb-4">Görev Dağılımı (Task Distribution)</h3>
+        <h3 className="text-lg font-semibold mb-4">GÃ¶rev DaÄŸÄ±lÄ±mÄ± (Task Distribution)</h3>
 
         <div className="h-64 min-w-0 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
@@ -152,10 +152,10 @@ const lineData = days.map(day => ({
         </ResponsiveContainer>
         </div>
       </div>
-      {/* LINE CHART (EKLENDİ) */}
+      {/* LINE CHART (EKLENDÄ°) */}
       <div className="glass-card mb-8 rounded-3xl border border-white/10 p-5 sm:p-6">
         <h3 className="text-lg font-semibold mb-4">
-          Haftalık Görev Aktivitelesi (Weekly Task Activity)
+          HaftalÄ±k GÃ¶rev Aktivitelesi (Weekly Task Activity)
         </h3>
         <div className="h-64 min-w-0 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
@@ -176,33 +176,33 @@ const lineData = days.map(day => ({
       </div>
       {/* SUMMARY */}
       <div className="glass-card p-6 rounded-3xl border border-white/10">
-        <h3 className="text-lg font-semibold mb-4">📊 Özet (Summary)</h3>
+        <h3 className="text-lg font-semibold mb-4">ğŸ“Š Ã–zet (Summary)</h3>
 
         <div className="space-y-2 text-zinc-300">
           <p>
-            • Görevlerin{" "}
+            â€¢ GÃ¶revlerin{" "}
             <span className={`font-bold ${getCompletionColor(stats.completionRate)}`}>
               {stats.completionRate}%
             </span>{" "}
-            tamamlandı. (Your tasks are {stats.completionRate}% completed.)
+            tamamlandÄ±. (Your tasks are {stats.completionRate}% completed.)
           </p>
 
           <p>
-            • Hala{" "}
+            â€¢ Hala{" "}
             <span className="font-bold text-blue-400">
               {stats.totalTasks - stats.completedTasks}
             </span>{" "}
-            görev bekliyor. ({stats.totalTasks - stats.completedTasks} tasks are pending.)
+            gÃ¶rev bekliyor. ({stats.totalTasks - stats.completedTasks} tasks are pending.)
           </p>
 
           <p>
-            • <span className="font-bold text-yellow-400">{stats.badges}</span>{" "}
-            rozet kazandınız. (You earned {stats.badges} badges.) 🏆
+            â€¢ <span className="font-bold text-yellow-400">{stats.badges}</span>{" "}
+            rozet kazandÄ±nÄ±z. (You earned {stats.badges} badges.) ğŸ†
           </p>
 
           {stats.completionRate === 100 && stats.totalTasks > 0 && (
             <p className="text-green-400 font-bold">
-              ✨ Tebrikler! Tüm görevleri tamamladınız! (Congratulations! You completed all tasks!)
+              âœ¨ Tebrikler! TÃ¼m gÃ¶revleri tamamladÄ±nÄ±z! (Congratulations! You completed all tasks!)
             </p>
           )}
         </div>
@@ -212,3 +212,4 @@ const lineData = days.map(day => ({
 }
 
 export default Analytics
+

@@ -1,11 +1,11 @@
-export const getYoutubeEmbedUrl = (url) => {
+﻿export const getYoutubeEmbedUrl = (url: string): string => {
   try {
     const parsed = new URL(url)
 
     let videoId = ""
 
     if (parsed.hostname.includes("youtube.com")) {
-      videoId = parsed.searchParams.get("v")
+      videoId = parsed.searchParams.get("v") ?? ""
     }
 
     if (parsed.hostname.includes("youtu.be")) {
@@ -20,7 +20,7 @@ export const getYoutubeEmbedUrl = (url) => {
   }
 }
 
-export const getDirectAudioUrl = (url) => {
+export const getDirectAudioUrl = (url: string): string => {
   const trimmedUrl = url.trim()
   if (!trimmedUrl || getYoutubeEmbedUrl(trimmedUrl)) return ""
 
@@ -33,8 +33,9 @@ export const getDirectAudioUrl = (url) => {
   }
 }
 
-export const formatTime = (seconds) => {
+export const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
 }
+

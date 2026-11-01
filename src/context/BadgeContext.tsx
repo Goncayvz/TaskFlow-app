@@ -1,150 +1,153 @@
-/* eslint-disable react-refresh/only-export-components */
+﻿/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useContext, useEffect } from "react"
+import type { PropsWithChildren } from "react"
+import type { Badge } from "../data/types"
 
-const BadgeContext = createContext()
+type BadgeContextValue = { earnedBadges: number[]; addBadge: (badgeId: number) => boolean; checkAndAwardBadges: (completedCount: number, totalCount?: number) => Badge[]; getBadgeInfo: (badgeId: number) => Badge | undefined; getEarnedBadgesList: () => Badge[]; BADGES: Badge[] }
+const BadgeContext = createContext<BadgeContextValue | null>(null)
 
-export const BADGES = [
+export const BADGES: Badge[] = [
   {
     id: 1,
-    name: "İlk Adım (First Step)",
-    description: "1 görevi tamamla (Complete 1 task)",
-    icon: "🎯",
+    name: "Ä°lk AdÄ±m (First Step)",
+    description: "1 gÃ¶revi tamamla (Complete 1 task)",
+    icon: "ğŸ¯",
     threshold: 1,
     category: "completions"
   },
   {
     id: 2,
-    name: "Bronz Başarı (Bronze Achievement)",
-    description: "5 görevi tamamla (Complete 5 tasks)",
-    icon: "🥉",
+    name: "Bronz BaÅŸarÄ± (Bronze Achievement)",
+    description: "5 gÃ¶revi tamamla (Complete 5 tasks)",
+    icon: "ğŸ¥‰",
     threshold: 5,
     category: "completions"
   },
   {
     id: 3,
-    name: "Gümüş Başarı (Silver Achievement)",
-    description: "10 görevi tamamla (Complete 10 tasks)",
-    icon: "🥈",
+    name: "GÃ¼mÃ¼ÅŸ BaÅŸarÄ± (Silver Achievement)",
+    description: "10 gÃ¶revi tamamla (Complete 10 tasks)",
+    icon: "ğŸ¥ˆ",
     threshold: 10,
     category: "completions"
   },
   {
     id: 4,
-    name: "Altın Başarı (Gold Achievement)",
-    description: "20 görevi tamamla (Complete 20 tasks)",
-    icon: "🥇",
+    name: "AltÄ±n BaÅŸarÄ± (Gold Achievement)",
+    description: "20 gÃ¶revi tamamla (Complete 20 tasks)",
+    icon: "ğŸ¥‡",
     threshold: 20,
     category: "completions"
   },
   {
     id: 5,
-    name: "Elmas Başarı (Diamond Achievement)",
-    description: "50 görevi tamamla (Complete 50 tasks)",
-    icon: "💎",
+    name: "Elmas BaÅŸarÄ± (Diamond Achievement)",
+    description: "50 gÃ¶revi tamamla (Complete 50 tasks)",
+    icon: "ğŸ’",
     threshold: 50,
     category: "completions"
   },
   {
     id: 6,
-    name: "Hız Ustası (Speed Master)",
-    description: "2 görevi tamamla (Complete 2 tasks)",
-    icon: "⚡",
+    name: "HÄ±z UstasÄ± (Speed Master)",
+    description: "2 gÃ¶revi tamamla (Complete 2 tasks)",
+    icon: "âš¡",
     threshold: 2,
     category: "speed"
   },
   {
     id: 7,
-    name: "Hız Şampiyonu (Speed Champion)",
-    description: "5 görevi tamamla (Complete 5 tasks)",
-    icon: "🚀",
+    name: "HÄ±z Åampiyonu (Speed Champion)",
+    description: "5 gÃ¶revi tamamla (Complete 5 tasks)",
+    icon: "ğŸš€",
     threshold: 5,
     category: "speed"
   },
   {
     id: 8,
-    name: "Temizlik Ustası (Cleanup Master)",
-    description: "Tüm görevleri tamamla (Complete all tasks)",
-    icon: "✨",
+    name: "Temizlik UstasÄ± (Cleanup Master)",
+    description: "TÃ¼m gÃ¶revleri tamamla (Complete all tasks)",
+    icon: "âœ¨",
     threshold: 100,
     category: "cleanup"
   },
   {
     id: 9,
-    name: "Tasarımcı (Designer)",
-    description: "UI Design System görevini tamamla (Complete the UI Design System task)",
-    icon: "🎨",
+    name: "TasarÄ±mcÄ± (Designer)",
+    description: "UI Design System gÃ¶revini tamamla (Complete the UI Design System task)",
+    icon: "ğŸ¨",
     threshold: 1,
     category: "specific"
   },
   {
     id: 10,
-    name: "Güvenlik Uzmanı (Security Expert)",
-    description: "Authentication görevini tamamla (Complete the Authentication task)",
-    icon: "🔐",
+    name: "GÃ¼venlik UzmanÄ± (Security Expert)",
+    description: "Authentication gÃ¶revini tamamla (Complete the Authentication task)",
+    icon: "ğŸ”",
     threshold: 1,
     category: "specific"
   },
   {
     id: 11,
-    name: "Verimli Gün (Productive Day)",
-    description: "3 görevi aynı günde tamamla (Complete 3 tasks in one day)",
-    icon: "☀️",
+    name: "Verimli GÃ¼n (Productive Day)",
+    description: "3 gÃ¶revi aynÄ± gÃ¼nde tamamla (Complete 3 tasks in one day)",
+    icon: "â˜€ï¸",
     threshold: 3,
     category: "daily"
   },
   {
     id: 12,
-    name: "İş Diyarı (Task Realm)",
-    description: "10 görev ekle (Add 10 tasks)",
-    icon: "📋",
+    name: "Ä°ÅŸ DiyarÄ± (Task Realm)",
+    description: "10 gÃ¶rev ekle (Add 10 tasks)",
+    icon: "ğŸ“‹",
     threshold: 10,
     category: "created"
   },
   {
     id: 13,
-    name: "Ekibin Kahramanı (Team Hero)",
-    description: "5 gün üst üste aktif ol (Be active for 5 days in a row)",
-    icon: "🦸",
+    name: "Ekibin KahramanÄ± (Team Hero)",
+    description: "5 gÃ¼n Ã¼st Ã¼ste aktif ol (Be active for 5 days in a row)",
+    icon: "ğŸ¦¸",
     threshold: 5,
     category: "streak"
   },
   {
     id: 14,
-    name: "Mükemmeliyetçi (Perfectionist)",
-    description: "100% görev başarı oranı (100% task success rate)",
-    icon: "💯",
+    name: "MÃ¼kemmeliyetÃ§i (Perfectionist)",
+    description: "100% gÃ¶rev baÅŸarÄ± oranÄ± (100% task success rate)",
+    icon: "ğŸ’¯",
     threshold: 100,
     category: "perfect"
   },
   {
     id: 15,
-    name: "Süper Verimliliği (Super Productivity)",
-    description: "30 görev tamamla (Complete 30 tasks)",
-    icon: "🌟",
+    name: "SÃ¼per VerimliliÄŸi (Super Productivity)",
+    description: "30 gÃ¶rev tamamla (Complete 30 tasks)",
+    icon: "ğŸŒŸ",
     threshold: 30,
     category: "completions"
   },
   {
     id: 16,
     name: "Lider (Leader)",
-    description: "100 görev tamamla (Complete 100 tasks)",
-    icon: "👑",
+    description: "100 gÃ¶rev tamamla (Complete 100 tasks)",
+    icon: "ğŸ‘‘",
     threshold: 100,
     category: "completions"
   },
   {
     id: 17,
-    name: "Zaman Yöneticisi (Time Manager)",
-    description: "Hiç gecikmiş görev yapma (Do not create overdue tasks)",
-    icon: "⏰",
+    name: "Zaman YÃ¶neticisi (Time Manager)",
+    description: "HiÃ§ gecikmiÅŸ gÃ¶rev yapma (Do not create overdue tasks)",
+    icon: "â°",
     threshold: 1,
     category: "ontime"
   },
   {
     id: 18,
-    name: "Dikkat Meraklısı (Detail Seeker)",
-    description: "Çok detaylı görev açıklaması ekle (Add a very detailed task description)",
-    icon: "🔍",
+    name: "Dikkat MeraklÄ±sÄ± (Detail Seeker)",
+    description: "Ã‡ok detaylÄ± gÃ¶rev aÃ§Ä±klamasÄ± ekle (Add a very detailed task description)",
+    icon: "ğŸ”",
     threshold: 1,
     category: "detail"
   },
@@ -152,21 +155,21 @@ export const BADGES = [
     id: 19,
     name: "Sosyal Kelebek (Social Butterfly)",
     description: "Yeni profil bilgileri ekle (Add new profile information)",
-    icon: "🦋",
+    icon: "ğŸ¦‹",
     threshold: 1,
     category: "social"
   },
   {
     id: 20,
-    name: "Başlangıç Ustası (Setup Master)",
-    description: "Profil ve ayarlarını tamamla (Complete your profile and settings)",
-    icon: "🚀",
+    name: "BaÅŸlangÄ±Ã§ UstasÄ± (Setup Master)",
+    description: "Profil ve ayarlarÄ±nÄ± tamamla (Complete your profile and settings)",
+    icon: "ğŸš€",
     threshold: 1,
     category: "setup"
   }
 ]
 
-export function getBadgeAwards(completedCount, totalCount = 0, earnedBadges = []) {
+export function getBadgeAwards(completedCount: number, totalCount = 0, earnedBadges: number[] = []): Badge[] {
   const earnedSet = new Set(earnedBadges)
   const awards = [
     ...BADGES.filter(
@@ -188,8 +191,8 @@ export function getBadgeAwards(completedCount, totalCount = 0, earnedBadges = []
   return awards
 }
 
-export function BadgeProvider({ children }) {
-  const [earnedBadges, setEarnedBadges] = useState(() => {
+export function BadgeProvider({ children }: PropsWithChildren) {
+  const [earnedBadges, setEarnedBadges] = useState<number[]>(() => {
     const saved = localStorage.getItem("earnedBadges")
     return saved ? JSON.parse(saved) : []
   })
@@ -198,7 +201,7 @@ export function BadgeProvider({ children }) {
     localStorage.setItem("earnedBadges", JSON.stringify(earnedBadges))
   }, [earnedBadges])
 
-  function addBadge(badgeId) {
+  function addBadge(badgeId: number) {
     if (!earnedBadges.includes(badgeId)) {
       setEarnedBadges((prev) => [...prev, badgeId])
       return true
@@ -206,10 +209,10 @@ export function BadgeProvider({ children }) {
     return false
   }
 
-  function checkAndAwardBadges(completedCount, totalCount = 0) {
-    const newBadges = []
+  function checkAndAwardBadges(completedCount: number, totalCount = 0): Badge[] {
+    const newBadges: Badge[] = []
     
-    // Tamamlama sayısına göre
+    // Tamamlama sayÄ±sÄ±na gÃ¶re
     BADGES
       .filter((badge) => badge.category === "completions" && completedCount >= badge.threshold && !earnedBadges.includes(badge.id))
       .forEach((badge) => {
@@ -217,7 +220,7 @@ export function BadgeProvider({ children }) {
         newBadges.push(badge)
       })
 
-    // Hız rozetleri (tamamlama sayısına göre)
+    // HÄ±z rozetleri (tamamlama sayÄ±sÄ±na gÃ¶re)
     BADGES
       .filter((badge) => badge.category === "speed" && completedCount >= badge.threshold && !earnedBadges.includes(badge.id))
       .forEach((badge) => {
@@ -225,7 +228,7 @@ export function BadgeProvider({ children }) {
         newBadges.push(badge)
       })
 
-    // Mükemmellik (100% tamamlama oranı)
+    // MÃ¼kemmellik (100% tamamlama oranÄ±)
     if (totalCount > 0 && completedCount === totalCount && totalCount >= 5) {
       const perfectBadge = BADGES.find(b => b.id === 14)
       if (perfectBadge && !earnedBadges.includes(14)) {
@@ -234,7 +237,7 @@ export function BadgeProvider({ children }) {
       }
     }
 
-    // İş Diyarı (10+ görev oluşturulmuş)
+    // Ä°ÅŸ DiyarÄ± (10+ gÃ¶rev oluÅŸturulmuÅŸ)
     if (totalCount >= 10) {
       const creatorBadge = BADGES.find(b => b.id === 12)
       if (creatorBadge && !earnedBadges.includes(12)) {
@@ -246,12 +249,12 @@ export function BadgeProvider({ children }) {
     return newBadges
   }
 
-  function getBadgeInfo(badgeId) {
+  function getBadgeInfo(badgeId: number) {
     return BADGES.find((b) => b.id === badgeId)
   }
 
   function getEarnedBadgesList() {
-    return earnedBadges.map((id) => getBadgeInfo(id)).filter(Boolean)
+    return earnedBadges.map((id) => getBadgeInfo(id)).filter((badge): badge is Badge => badge !== undefined)
   }
 
   return (
@@ -277,3 +280,10 @@ export function useBadge() {
   }
   return context
 }
+
+
+
+
+
+
+

@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react"
+﻿import { useState, useEffect } from "react"
 import TaskCard from "../components/TaskCard"
 import { useBadge } from "../context/BadgeContext"
 import { useNotification } from "../context/NotificationContext"
+import type { Task } from "../data/types"
 
 function Tasks() {
   const { checkAndAwardBadges } = useBadge()
   const { addNotification } = useNotification()
 
-  const [tasks, setTasks] = useState(() => {
+  const [tasks, setTasks] = useState<Task[]>(() => {
     const savedTasks = localStorage.getItem("tasks")
     return savedTasks
       ? JSON.parse(savedTasks)
@@ -30,7 +31,7 @@ function Tasks() {
   })
 
   const [isEditing, setIsEditing] = useState(false)
-  const [selectedTask, setSelectedTask] = useState(null)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const [editDesc, setEditDesc] = useState("")
 
@@ -39,12 +40,12 @@ function Tasks() {
 
     // Rozetleri kontrol et
     const completedCount = tasks.filter(t => t.status === "Completed").length
-    const newBadges = checkAndAwardBadges(completedCount, tasks.length, { tasks })
+    const newBadges = checkAndAwardBadges(completedCount, tasks.length)
 
-    // Yeni rozetler kazanıldıysa bildirim göster
+    // Yeni rozetler kazanÄ±ldÄ±ysa bildirim gÃ¶ster
     if (newBadges.length > 0) {
       newBadges.forEach((badge) => {
-        addNotification(`🎉 Yeni rozet: ${badge.name}!`, "success", 4000)
+        addNotification(`ğŸ‰ Yeni rozet: ${badge.name}!`, "success", 4000)
       })
     }
   }, [tasks, checkAndAwardBadges, addNotification])
@@ -109,20 +110,20 @@ function Tasks() {
       {isEditing && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
           <div className="bg-zinc-900 p-6 rounded-lg w-[92vw] max-w-md border border-white/10">
-            <h2 className="text-xl mb-4 font-semibold">Görevi Düzenle (Edit Task)</h2>
+            <h2 className="text-xl mb-4 font-semibold">GÃ¶revi DÃ¼zenle (Edit Task)</h2>
 
             <input
               className="w-full mb-3 p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              placeholder="Başlık (Title)"
+              placeholder="BaÅŸlÄ±k (Title)"
             />
 
             <input
               className="w-full mb-4 p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white"
               value={editDesc}
               onChange={(e) => setEditDesc(e.target.value)}
-              placeholder="Açıklama (Description)"
+              placeholder="AÃ§Ä±klama (Description)"
             />
 
             <div className="flex flex-col sm:flex-row gap-2">
@@ -137,7 +138,7 @@ function Tasks() {
                 }}
                 className="bg-red-500 px-4 py-2 rounded w-full sm:w-auto"
               >
-                İptal (Cancel)
+                Ä°ptal (Cancel)
               </button>
             </div>
           </div>
@@ -148,3 +149,6 @@ function Tasks() {
 }
 
 export default Tasks
+
+
+

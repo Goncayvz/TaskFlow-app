@@ -1,22 +1,22 @@
-import { useState } from "react"
+﻿import { useState } from "react"
 import { useBadge } from "../context/BadgeContext"
 import { useUser } from "../context/UserContext"
 
 const avatarOptions = [
-  "👤",
-  "🧑",
-  "🧑‍💻",
-  "👩‍💻",
-  "🧑‍🎨",
-  "🧑‍🚀",
-  "🧑‍🔧",
-  "🧑‍🏫",
-  "🧑‍⚕️",
-  "👩‍💼",
-  "👩‍🎨",
-  "👩‍🏫",
-  "👩‍⚕️",
-  "🧑‍🎓"
+  "ğŸ‘¤",
+  "ğŸ§‘",
+  "ğŸ§‘â€ğŸ’»",
+  "ğŸ‘©â€ğŸ’»",
+  "ğŸ§‘â€ğŸ¨",
+  "ğŸ§‘â€ğŸš€",
+  "ğŸ§‘â€ğŸ”§",
+  "ğŸ§‘â€ğŸ«",
+  "ğŸ§‘â€âš•ï¸",
+  "ğŸ‘©â€ğŸ’¼",
+  "ğŸ‘©â€ğŸ¨",
+  "ğŸ‘©â€ğŸ«",
+  "ğŸ‘©â€âš•ï¸",
+  "ğŸ§‘â€ğŸ“"
 ]
 
 function Profile() {
@@ -61,7 +61,10 @@ function Profile() {
 
     const reader = new FileReader()
     reader.onload = () => {
-      setFormData((prev) => ({ ...prev, avatar: reader.result }))
+      const avatarData = reader.result
+      if (typeof avatarData === "string") {
+        setFormData((prev) => ({ ...prev, avatar: avatarData }))
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -78,7 +81,7 @@ function Profile() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:p-8">
-      <h1 className="mb-8 text-2xl font-bold sm:text-3xl">Kullanıcı Profili (User Profile)</h1>
+      <h1 className="mb-8 text-2xl font-bold sm:text-3xl">KullanÄ±cÄ± Profili (User Profile)</h1>
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
         <div className="glass-card p-5 sm:p-8 rounded-3xl border border-white/10">
@@ -98,7 +101,7 @@ function Profile() {
             <div className="min-w-0 flex-1">
               <h2 className="break-words text-2xl font-bold sm:text-3xl">{user.name}</h2>
               <p className="text-blue-300 text-sm uppercase tracking-wide mb-2">
-                {user.jobTitle || "Görev tutkunu (Task enthusiast)"}
+                {user.jobTitle || "GÃ¶rev tutkunu (Task enthusiast)"}
               </p>
               <p className="break-words leading-7 text-zinc-300">{user.bio}</p>
             </div>
@@ -106,7 +109,7 @@ function Profile() {
 
           <div className="grid gap-4 mt-8 sm:grid-cols-2 xl:grid-cols-4">
             <div className="glass-card p-5 rounded-3xl border border-white/10">
-              <p className="text-zinc-400 text-sm">Tamamlanan Görevler (Completed Tasks)</p>
+              <p className="text-zinc-400 text-sm">Tamamlanan GÃ¶revler (Completed Tasks)</p>
               <p className="text-3xl font-semibold mt-3">{completedTasks}</p>
             </div>
             <div className="glass-card p-5 rounded-3xl border border-white/10">
@@ -114,11 +117,11 @@ function Profile() {
               <p className="text-3xl font-semibold mt-3">{inProgressTasks}</p>
             </div>
             <div className="glass-card p-5 rounded-3xl border border-white/10">
-              <p className="text-zinc-400 text-sm">Kazandığın Rozetler (Earned Badges)</p>
+              <p className="text-zinc-400 text-sm">KazandÄ±ÄŸÄ±n Rozetler (Earned Badges)</p>
               <p className="text-3xl font-semibold mt-3">{badgeCount}</p>
             </div>
             <div className="glass-card p-5 rounded-3xl border border-white/10">
-              <p className="text-zinc-400 text-sm">Profil Tamamlanması (Profile Completion)</p>
+              <p className="text-zinc-400 text-sm">Profil TamamlanmasÄ± (Profile Completion)</p>
               <p className="text-3xl font-semibold mt-3">{profileCompletion}%</p>
             </div>
           </div>
@@ -140,7 +143,7 @@ function Profile() {
         <div className="glass-card p-5 sm:p-8 rounded-3xl border border-white/10">
           {!isEditing ? (
             <>
-              <h2 className="text-2xl font-bold mb-6">Profil Detayları (Profile Details)</h2>
+              <h2 className="text-2xl font-bold mb-6">Profil DetaylarÄ± (Profile Details)</h2>
 
               <div className="grid gap-5">
                 <div className="grid gap-2">
@@ -161,12 +164,12 @@ function Profile() {
                 }}
                 className="mt-8 w-full bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-3xl"
               >
-                Profili Düzenle (Edit Profile)
+                Profili DÃ¼zenle (Edit Profile)
               </button>
             </>
           ) : (
             <>
-              <h2 className="text-2xl font-bold mb-6">Profili Düzenle (Edit Profile)</h2>
+              <h2 className="text-2xl font-bold mb-6">Profili DÃ¼zenle (Edit Profile)</h2>
 
               <div className="space-y-4">
                 <div>
@@ -219,13 +222,13 @@ function Profile() {
                     name="bio"
                     value={formData.bio}
                     onChange={handleChange}
-                    rows="3"
+                    rows={3}
                     className="w-full p-3 bg-zinc-950 rounded-3xl border border-white/10"
                   />
                 </div>
 
                 <div className="grid gap-2">
-                  <label className="block text-zinc-400 text-sm mb-2">Avatar Seçimi (Avatar Selection)</label>
+                  <label className="block text-zinc-400 text-sm mb-2">Avatar SeÃ§imi (Avatar Selection)</label>
                   <div className="flex flex-wrap gap-2">
                     {avatarOptions.map((avatar) => (
                       <button
@@ -245,7 +248,7 @@ function Profile() {
                 </div>
 
                 <div>
-                  <label className="block text-zinc-400 text-sm mb-2">Profil Fotoğrafı Yükle (Upload Profile Photo)</label>
+                  <label className="block text-zinc-400 text-sm mb-2">Profil FotoÄŸrafÄ± YÃ¼kle (Upload Profile Photo)</label>
                   <input
                     type="file"
                     accept="image/*"
@@ -255,7 +258,7 @@ function Profile() {
                   {formData.avatar?.startsWith("data:image") && (
                     <img
                       src={formData.avatar}
-                      alt="Avatar önizleme (Avatar preview)"
+                      alt="Avatar Ã¶nizleme (Avatar preview)"
                       className="mt-3 w-24 h-24 rounded-full object-cover border border-white/10"
                     />
                   )}
@@ -274,7 +277,7 @@ function Profile() {
                   onClick={handleCancel}
                   className="flex-1 bg-red-500 hover:bg-red-600 px-6 py-3 rounded-3xl"
                 >
-                  İptal (Cancel)
+                  Ä°ptal (Cancel)
                 </button>
               </div>
             </>
@@ -286,3 +289,6 @@ function Profile() {
 }
 
 export default Profile
+
+
+

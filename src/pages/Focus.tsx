@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useMemo, useState, useRef } from "react"
+﻿import { useCallback, useEffect, useMemo, useState, useRef } from "react"
 import { useNotification } from "../context/NotificationContext"
 import { formatTime, getDirectAudioUrl, getYoutubeEmbedUrl } from "../utils/focusHelpers"
 import "../styles/focus-mode.css"
+
+interface YouTubePlayer { setVolume: (volume: number) => void; destroy: () => void; playVideo: () => void; pauseVideo: () => void }
 
 const PRESETS = {
   pomodoro: { work: 25, shortBreak: 5, longBreak: 15 },
@@ -10,27 +12,27 @@ const PRESETS = {
 }
 
 const WORK_MOTTOS = [
-  "Bir adım daha. Devam. (One more step. Keep going.)",
-  "Odak = özgürlük. (Focus = freedom.)",
-  "Bugün küçük, yarın büyük. (Small today, big tomorrow.)",
+  "Bir adÄ±m daha. Devam. (One more step. Keep going.)",
+  "Odak = Ã¶zgÃ¼rlÃ¼k. (Focus = freedom.)",
+  "BugÃ¼n kÃ¼Ã§Ã¼k, yarÄ±n bÃ¼yÃ¼k. (Small today, big tomorrow.)",
   "Sadece 5 dakika daha. (Just 5 more minutes.)",
-  "Dikkatini seç, sonucu yaşa. (Choose your attention, live the result.)"
+  "Dikkatini seÃ§, sonucu yaÅŸa. (Choose your attention, live the result.)"
 ]
 
 const BREAK_MOTTOS = [
-  "Nefes al, gevşe. (Breathe and relax.)",
-  "Su içmeyi unutma. (Remember to drink water.)",
-  "Omuzlarını rahat bırak. (Relax your shoulders.)",
-  "Gözlerini dinlendir. (Rest your eyes.)",
+  "Nefes al, gevÅŸe. (Breathe and relax.)",
+  "Su iÃ§meyi unutma. (Remember to drink water.)",
+  "OmuzlarÄ±nÄ± rahat bÄ±rak. (Relax your shoulders.)",
+  "GÃ¶zlerini dinlendir. (Rest your eyes.)",
   "Harika gidiyorsun. (You are doing great.)"
 ]
 
 const SOUND_TYPES = {
-  warning: { label: "Uyarı (Warning)", key: "warning" },
-  work: { label: "Çalışma (Work)", key: "work" },
+  warning: { label: "UyarÄ± (Warning)", key: "warning" },
+  work: { label: "Ã‡alÄ±ÅŸma (Work)", key: "work" },
   break: { label: "Mola (Break)", key: "break" },
   chime: { label: "Chime", key: "chime" },
-  soft: { label: "Yumuşak (Soft)", key: "soft" },
+  soft: { label: "YumuÅŸak (Soft)", key: "soft" },
   digital: { label: "Dijital", key: "digital" },
   none: { label: "Sessiz (Silent)", key: "none" }
 }
@@ -70,7 +72,7 @@ const defaultSettings = {
   ambientVolume: 0.3,
   bgSoundOn: true,
 
-  // YouTube (arka plan sesi) - kullanıcıdan gelen link
+  // YouTube (arka plan sesi) - kullanÄ±cÄ±dan gelen link
   youtubeUrl: ""
 }
 
@@ -116,10 +118,10 @@ function Focus() {
   // User-provided YouTube link
   const [youtubeUrl, setYoutubeUrl] = useState(initialSettings.youtubeUrl)
 
-  const ambientAudioRef = useRef(null)
-  const ambientVolumeRafRef = useRef(null)
+  const ambientAudioRef = useRef<HTMLAudioElement | null>(null)
+  const ambientVolumeRafRef = useRef<number | null>(null)
 
-  const ytPlayerRef = useRef(null)
+  const ytPlayerRef = useRef<YouTubePlayer | null>(null)
   const ytReadyRef = useRef(false)
   const ytPlayerBuiltForUrlRef = useRef("")
   const ytVolumeRef = useRef(ambientVolume)
@@ -167,7 +169,7 @@ function Focus() {
 
   const setYoutubeVolume = useCallback((volume) => {
     const player = ytPlayerRef.current
-    if (!player || typeof player.setVolume !== "function") return
+    if (!player) return
 
     try {
       player.setVolume(Math.round(Math.max(0, Math.min(1, volume)) * 100))
@@ -176,7 +178,7 @@ function Focus() {
     }
   }, [])
 
-  // YouTube IFrame API yükleme
+  // YouTube IFrame API yÃ¼kleme
   useEffect(() => {
     if (typeof window === "undefined") return
 
@@ -190,7 +192,7 @@ function Focus() {
       tag.id = "youtube-iframe-api"
       tag.src = "https://www.youtube.com/iframe_api"
       const firstScriptTag = document.getElementsByTagName("script")[0]
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag)
     }
 
     window.onYouTubeIframeAPIReady = () => {
@@ -201,7 +203,7 @@ function Focus() {
   useEffect(() => {
     if (typeof window === "undefined") return
 
-    if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === "function") {
+    if (ytPlayerRef.current) {
       try {
         ytPlayerRef.current.destroy()
       } catch {
@@ -255,13 +257,13 @@ function Focus() {
     }
   }, [setYoutubeVolume, youtubeEmbedUrl])
 
-  // Volume'ü YouTube player'a bas
+  // Volume'Ã¼ YouTube player'a bas
   useEffect(() => {
     ytVolumeRef.current = ambientVolume
     setYoutubeVolume(ambientVolume)
   }, [ambientVolume, setYoutubeVolume])
 
-  // Timer start/stop'a göre YouTube play/pause
+  // Timer start/stop'a gÃ¶re YouTube play/pause
   useEffect(() => {
     if (!youtubeEmbedUrl || !youtubeEmbedUrl.trim()) return
 
@@ -288,9 +290,9 @@ function Focus() {
       return
     }
 
-    // Autoplay politikası: YouTube set edilecekse mp3 çalma
+    // Autoplay politikasÄ±: YouTube set edilecekse mp3 Ã§alma
     if (isWorkSession && youtubeEmbedUrl && youtubeEmbedUrl.trim()) {
-      // YouTube mp3 yerine iframe/player tarafından yönetilir
+      // YouTube mp3 yerine iframe/player tarafÄ±ndan yÃ¶netilir
       stopAmbientSound()
     } else {
       playAmbientSound()
@@ -310,7 +312,7 @@ function Focus() {
     }
   }, [])
 
-  const endSessionRef = useRef(null)
+  const endSessionRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     if (!isRunning) return
@@ -336,7 +338,7 @@ function Focus() {
   }, [])
 
   const playTone = useCallback(
-    (frequency, duration = 0.16, type = "sine") => {
+    (frequency: number, duration = 0.16, type: OscillatorType = "sine") => {
       if (!soundOn) return
       if (typeof window === "undefined") return
 
@@ -375,7 +377,7 @@ function Focus() {
           }
         }
       } catch (error) {
-        console.warn("Ses oynatılamadı", error)
+        console.warn("Ses oynatÄ±lamadÄ±", error)
       }
     },
     [soundOn]
@@ -460,7 +462,7 @@ function Focus() {
             id: `${completedAt}-${prev.length}`,
             completedAt,
             minutes: workMinutes,
-            mode: mode === "extended" ? "Uzun (Long)" : mode === "quick" ? "Hızlı (Quick)" : mode === "custom" ? "Özel (Custom)" : "Pomodoro"
+            mode: mode === "extended" ? "Uzun (Long)" : mode === "quick" ? "HÄ±zlÄ± (Quick)" : mode === "custom" ? "Ã–zel (Custom)" : "Pomodoro"
           },
           ...prev
         ].slice(0, 8)
@@ -470,7 +472,7 @@ function Focus() {
       setSecondsLeft(nextBreak * 60)
       setCycleCount(isLongBreak ? 0 : nextCycle)
 
-      const message = isLongBreak ? "Uzun mola zamanı! (Long break time!)" : "Kısa mola zamanı! (Short break time!)"
+      const message = isLongBreak ? "Uzun mola zamanÄ±! (Long break time!)" : "KÄ±sa mola zamanÄ±! (Short break time!)"
       addNotification(message, "success", 4500)
       sendBrowserNotification(message)
       playSound("break")
@@ -478,8 +480,8 @@ function Focus() {
       setIsWorkSession(true)
       setMottoIndex(0)
       setSecondsLeft(workMinutes * 60)
-      addNotification("Çalışma zamanı! Odaklanmaya geri dön. (Work time! Return to focus.)", "info", 4500)
-      sendBrowserNotification("Çalışma zamanı! Odaklanmaya geri dön. (Work time! Return to focus.)")
+      addNotification("Ã‡alÄ±ÅŸma zamanÄ±! Odaklanmaya geri dÃ¶n. (Work time! Return to focus.)", "info", 4500)
+      sendBrowserNotification("Ã‡alÄ±ÅŸma zamanÄ±! Odaklanmaya geri dÃ¶n. (Work time! Return to focus.)")
       playSound("work")
     }
   }, [
@@ -593,12 +595,12 @@ function Focus() {
     setIsWorkSession(true)
     setMottoIndex(0)
     setIsRunning(false)
-    addNotification("Özel süreler kaydedildi. (Custom durations saved.)", "success", 3000)
+    addNotification("Ã–zel sÃ¼reler kaydedildi. (Custom durations saved.)", "success", 3000)
   }
 
   const isWarning = isRunning && secondsLeft <= 10
-  const sessionLabel = isWorkSession ? "Çalışma (Work)" : "Mola (Break)"
-  const sessionSubLabel = isWorkSession ? "Tam konsantre ol (Stay fully focused)" : "Rahatlamak için zaman (Time to relax)"
+  const sessionLabel = isWorkSession ? "Ã‡alÄ±ÅŸma (Work)" : "Mola (Break)"
+  const sessionSubLabel = isWorkSession ? "Tam konsantre ol (Stay fully focused)" : "Rahatlamak iÃ§in zaman (Time to relax)"
 
   const [mottoIndex, setMottoIndex] = useState(0)
   const mottos = isWorkSession ? WORK_MOTTOS : BREAK_MOTTOS
@@ -662,10 +664,10 @@ function Focus() {
         <section className="glass-card p-5 sm:p-8 rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold">Odaklanma Modları (Focus Modes)</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold">Odaklanma ModlarÄ± (Focus Modes)</h1>
               <p className="text-zinc-300 mt-2 max-w-2xl text-sm sm:text-base">
-                Pomodoro tempo, çalışma ve mola sürelerini özelleştirebileceğin bir odak alanı.
-                Zamanın sonuna yaklaştığında görsel uyarılar ve ekran bildirimleri alırsın.
+                Pomodoro tempo, Ã§alÄ±ÅŸma ve mola sÃ¼relerini Ã¶zelleÅŸtirebileceÄŸin bir odak alanÄ±.
+                ZamanÄ±n sonuna yaklaÅŸtÄ±ÄŸÄ±nda gÃ¶rsel uyarÄ±lar ve ekran bildirimleri alÄ±rsÄ±n.
                 (A focus area where you can customize Pomodoro, work, and break durations. You get visual alerts and screen notifications near the end.)
               </p>
             </div>
@@ -701,7 +703,7 @@ function Focus() {
                       mode === preset ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
                     }`}
                   >
-                    {preset === "pomodoro" ? "Pomodoro" : preset === "quick" ? "Hızlı (Quick)" : "Uzun (Long)"}
+                    {preset === "pomodoro" ? "Pomodoro" : preset === "quick" ? "HÄ±zlÄ± (Quick)" : "Uzun (Long)"}
                   </button>
                 ))}
               </div>
@@ -713,7 +715,7 @@ function Focus() {
           <section className="glass-card p-5 sm:p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
             <div className="flex items-center justify-between mb-6 gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-blue-300">{sessionLabel} Zamanlayıcı (Timer)</p>
+                <p className="text-sm uppercase tracking-[0.3em] text-blue-300">{sessionLabel} ZamanlayÄ±cÄ± (Timer)</p>
                 <h2 className="text-3xl sm:text-4xl font-bold mt-3">{formatTime(secondsLeft)}</h2>
               </div>
               <div className="text-right">
@@ -723,7 +725,7 @@ function Focus() {
                     isWorkSession ? "bg-green-500/20 text-green-300" : "bg-sky-500/20 text-sky-300"
                   }`}
                 >
-                  {isWorkSession ? "Çalışma (Work)" : "Mola (Break)"}
+                  {isWorkSession ? "Ã‡alÄ±ÅŸma (Work)" : "Mola (Break)"}
                 </span>
               </div>
             </div>
@@ -774,31 +776,31 @@ function Focus() {
                 onClick={() => setIsRunning((prev) => !prev)}
                 className="flex-1 sm:flex-none rounded-2xl bg-blue-500 px-6 py-3 font-semibold text-white hover:bg-blue-400"
               >
-                {isRunning ? "Duraklat (Pause)" : "Başlat (Start)"}
+                {isRunning ? "Duraklat (Pause)" : "BaÅŸlat (Start)"}
               </button>
               <button
                 type="button"
                 onClick={resetTimer}
                 className="flex-1 sm:flex-none rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-white hover:bg-white/10"
               >
-                Sıfırla (Reset)
+                SÄ±fÄ±rla (Reset)
               </button>
               <button
                 type="button"
                 onClick={handleCustomSave}
                 className="flex-1 rounded-2xl border border-emerald-500 bg-emerald-500/10 px-6 py-3 text-emerald-200 hover:bg-emerald-500/20 sm:flex-none"
               >
-                Ayarları Kaydet (Save Settings)
+                AyarlarÄ± Kaydet (Save Settings)
               </button>
             </div>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-zinc-400">Çalışma süresi (Work duration)</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-zinc-400">Ã‡alÄ±ÅŸma sÃ¼resi (Work duration)</p>
                 <p className="mt-3 text-3xl font-semibold">{workMinutes} dk</p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-zinc-400">Kısa mola (Short break)</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-zinc-400">KÄ±sa mola (Short break)</p>
                 <p className="mt-3 text-3xl font-semibold">{shortBreakMinutes} dk</p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
@@ -810,7 +812,7 @@ function Focus() {
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-semibold text-white">Tamamlanan Pomodorolar (Completed Pomodoros)</h3>
-                  <p className="text-sm text-zinc-400">Son odak oturumların burada listelenir. (Your latest focus sessions are listed here.)</p>
+                  <p className="text-sm text-zinc-400">Son odak oturumlarÄ±n burada listelenir. (Your latest focus sessions are listed here.)</p>
                 </div>
                 <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-sm font-semibold text-emerald-300">
                   {completedPomodoros.length} oturum (sessions)
@@ -841,19 +843,19 @@ function Focus() {
                 </div>
               ) : (
                 <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.03] px-4 py-6 text-center text-sm text-zinc-400">
-                  İlk çalışma oturumunu tamamladığında burada görünecek. (It will appear here after your first work session.)
+                  Ä°lk Ã§alÄ±ÅŸma oturumunu tamamladÄ±ÄŸÄ±nda burada gÃ¶rÃ¼necek. (It will appear here after your first work session.)
                 </div>
               )}
             </div>
           </section>
 
           <section className="glass-card rounded-3xl border border-white/10 p-5 shadow-2xl sm:p-8">
-            <h3 className="text-2xl font-semibold mb-4">Özelleştirilebilir Süreler (Custom Durations)</h3>
-            <p className="text-zinc-400 mb-6">Kendi çalışma ve mola sürelerini gir. (Enter your own work and break durations.)</p>
+            <h3 className="text-2xl font-semibold mb-4">Ã–zelleÅŸtirilebilir SÃ¼reler (Custom Durations)</h3>
+            <p className="text-zinc-400 mb-6">Kendi Ã§alÄ±ÅŸma ve mola sÃ¼relerini gir. (Enter your own work and break durations.)</p>
 
             <div className="space-y-4 mb-8">
               <label className="block">
-                <span className="text-sm text-zinc-200">Çalışma süresi (dakika) (Work duration in minutes)</span>
+                <span className="text-sm text-zinc-200">Ã‡alÄ±ÅŸma sÃ¼resi (dakika) (Work duration in minutes)</span>
                 <input
                   type="number"
                   min="1"
@@ -863,7 +865,7 @@ function Focus() {
                 />
               </label>
               <label className="block">
-                <span className="text-sm text-zinc-200">Kısa mola (dakika) (Short break in minutes)</span>
+                <span className="text-sm text-zinc-200">KÄ±sa mola (dakika) (Short break in minutes)</span>
                 <input
                   type="number"
                   min="1"
@@ -887,7 +889,7 @@ function Focus() {
             <div className="border-t border-white/10 pt-6">
               <h4 className="text-lg font-semibold mb-3">Ses Efektleri (Sound Effects)</h4>
               <label className="block mb-4">
-                <span className="text-sm text-zinc-200">Bildirim sesi seç (Choose notification sound)</span>
+                <span className="text-sm text-zinc-200">Bildirim sesi seÃ§ (Choose notification sound)</span>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   {Object.values(SOUND_TYPES).map((sound) => (
                     <button
@@ -918,7 +920,7 @@ function Focus() {
                     : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
                 }`}
               >
-                🔊 Sesi Test Et (Test Sound)
+                ğŸ”Š Sesi Test Et (Test Sound)
               </button>
             </div>
 
@@ -926,7 +928,7 @@ function Focus() {
               <h4 className="text-lg font-semibold mb-3">Arka Plan Sesi (Background Sound)</h4>
 
               <div className="mb-4">
-                <span className="text-sm text-zinc-200 mb-2 block">Kendi ses URL’in (mp3/aac direkt link) (Your audio URL)</span>
+                <span className="text-sm text-zinc-200 mb-2 block">Kendi ses URLâ€™in (mp3/aac direkt link) (Your audio URL)</span>
                 <input
                   value={youtubeUrl}
                   onChange={(e) => setYoutubeUrl(e.target.value)}
@@ -940,11 +942,11 @@ function Focus() {
                     onClick={() => {
                       const v = youtubeUrl.trim()
                       if (!v) {
-                        addNotification("Lütfen bir ses URL'i gir. (Please enter an audio URL.)", "error", 3000)
+                        addNotification("LÃ¼tfen bir ses URL'i gir. (Please enter an audio URL.)", "error", 3000)
                         return
                       }
                       setYoutubeUrl(v)
-                      addNotification("YouTube/Link kaydedildi. Timer ile otomatik açılır. (YouTube/link saved. It starts automatically with the timer.)", "success", 3000)
+                      addNotification("YouTube/Link kaydedildi. Timer ile otomatik aÃ§Ä±lÄ±r. (YouTube/link saved. It starts automatically with the timer.)", "success", 3000)
                     }}
                     className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold hover:bg-blue-400"
                   >
@@ -968,17 +970,17 @@ function Focus() {
                   type="button"
                   onClick={() => {
                     if (!bgSoundOn) {
-                      addNotification("Arka plan sesi kapalı. (Background sound is off.)", "warning", 2500)
+                      addNotification("Arka plan sesi kapalÄ±. (Background sound is off.)", "warning", 2500)
                       return
                     }
 
                     if (youtubeEmbedUrl) {
-                      addNotification("YouTube sesi zamanlayıcı başlayınca çalar. (YouTube sound plays when the timer starts.)", "info", 3000)
+                      addNotification("YouTube sesi zamanlayÄ±cÄ± baÅŸlayÄ±nca Ã§alar. (YouTube sound plays when the timer starts.)", "info", 3000)
                       return
                     }
 
                     if (!directAudioUrl) {
-                      addNotification("Lütfen önce direkt audio URL veya YouTube linki gir. (Please enter a direct audio URL or YouTube link first.)", "warning", 3000)
+                      addNotification("LÃ¼tfen Ã¶nce direkt audio URL veya YouTube linki gir. (Please enter a direct audio URL or YouTube link first.)", "warning", 3000)
                       return
                     }
 
@@ -986,7 +988,7 @@ function Focus() {
                   }}
                   className="rounded-lg bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-200 hover:bg-blue-500/30"
                 >
-                  Arka Planı Test Et (Test Background)
+                  Arka PlanÄ± Test Et (Test Background)
                 </button>
                 <button
                   type="button"
@@ -1023,4 +1025,7 @@ function Focus() {
 }
 
 export default Focus
+
+
+
 

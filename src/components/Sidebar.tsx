@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
 import { useBadge } from "../context/BadgeContext";
 import { useNotification } from "../context/NotificationContext";
 
-function Sidebar({ mobileOpen = false, onClose }) {
+function Sidebar({ mobileOpen = false, onClose }: { mobileOpen?: boolean; onClose?: () => void }) {
   const { user } = useUser();
   const { getEarnedBadgesList } = useBadge();
   const { addNotification } = useNotification();
@@ -14,7 +14,7 @@ function Sidebar({ mobileOpen = false, onClose }) {
   const prevBadgeCountRef = useRef(badgeCount);
 
   useEffect(() => {
-    // sadece sayım artışında bildirim bas
+    // sadece sayÄ±m artÄ±ÅŸÄ±nda bildirim bas
     if (badgeCount > prevBadgeCountRef.current) {
       addNotification(`Rozetler (Badges): ${badgeCount}`, "info", 3500);
     }
@@ -36,11 +36,11 @@ function Sidebar({ mobileOpen = false, onClose }) {
   }, [mobileOpen, onClose]);
 
   const navItems = [
-    { to: "/", label: "Dashboard", icon: "🏠" },
-    { to: "/tasks", label: "Tasks", icon: "✅" },
-    { to: "/focus", label: "Focus", icon: "🎯" },
-    { to: "/analytics", label: "Analytics", icon: "📊" },
-    { to: "/badges", label: "Badges", icon: "🏅" }
+    { to: "/", label: "Dashboard", icon: "ğŸ " },
+    { to: "/tasks", label: "Tasks", icon: "âœ…" },
+    { to: "/focus", label: "Focus", icon: "ğŸ¯" },
+    { to: "/analytics", label: "Analytics", icon: "ğŸ“Š" },
+    { to: "/badges", label: "Badges", icon: "ğŸ…" }
   ];
 
   const profileContent = (
@@ -72,7 +72,7 @@ function Sidebar({ mobileOpen = false, onClose }) {
         <button
           type="button"
           className="sm:hidden fixed inset-0 z-40 bg-black/50"
-          aria-label="Menüyü kapat (Close menu)"
+          aria-label="MenÃ¼yÃ¼ kapat (Close menu)"
           onClick={() => onClose?.()}
         />
       )}
@@ -97,18 +97,18 @@ function Sidebar({ mobileOpen = false, onClose }) {
               type="button"
               onClick={() => onClose?.()}
               className="sm:hidden text-sm text-zinc-300 px-2 py-1 rounded-full border border-zinc-700 hover:bg-zinc-800"
-              title="Menüyü kapat (Close menu)"
+              title="MenÃ¼yÃ¼ kapat (Close menu)"
             >
-              ✕
+              âœ•
             </button>
 
             <button
               type="button"
               onClick={() => setCollapsed((prev) => !prev)}
               className="hidden sm:inline-flex text-sm text-zinc-400 px-2 py-1 rounded-full border border-zinc-700 hover:bg-zinc-800"
-              title={collapsed ? "Menüyü aç (Open menu)" : "Menüyü kapat (Close menu)"}
+              title={collapsed ? "MenÃ¼yÃ¼ aÃ§ (Open menu)" : "MenÃ¼yÃ¼ kapat (Close menu)"}
             >
-              {collapsed ? "➡" : "⬅"}
+              {collapsed ? "â¡" : "â¬…"}
             </button>
           </div>
         </div>
@@ -130,14 +130,14 @@ function Sidebar({ mobileOpen = false, onClose }) {
             <div className="mt-4 text-sm text-zinc-300">
               <div className="flex min-w-0 flex-col gap-3">
                 <p className="break-words leading-5 text-zinc-300">
-                  {user.jobTitle || "Görev tutkunuz (Task enthusiast)"}
+                  {user.jobTitle || "GÃ¶rev tutkunuz (Task enthusiast)"}
                 </p>
                 <NavLink
                   to="/profile"
                   onClick={() => onClose?.()}
                   className="inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-blue-400/30 bg-blue-500/10 px-3 py-2 font-medium text-blue-200 transition hover:border-blue-300 hover:bg-blue-500/20"
                 >
-                  Profili aç (Open profile)
+                  Profili aÃ§ (Open profile)
                 </NavLink>
               </div>
             </div>
@@ -165,8 +165,8 @@ function Sidebar({ mobileOpen = false, onClose }) {
               {item.to === "/badges" && badgeCount > 0 && !collapsed && (
                 <span
                   className="ml-auto bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full select-none"
-                  aria-label={`Rozet sayısı (Badge count): ${badgeCount}`}
-                  title={`Rozet sayısı (Badge count): ${badgeCount}`}
+                  aria-label={`Rozet sayÄ±sÄ± (Badge count): ${badgeCount}`}
+                  title={`Rozet sayÄ±sÄ± (Badge count): ${badgeCount}`}
                 >
                   {badgeCount}
                 </span>
@@ -175,8 +175,8 @@ function Sidebar({ mobileOpen = false, onClose }) {
               {item.to === "/badges" && badgeCount > 0 && collapsed && (
                 <span
                   className="ml-auto bg-yellow-500 text-black text-[10px] font-bold px-2 py-1 rounded-full select-none"
-                  aria-label={`Rozet sayısı (Badge count): ${badgeCount}`}
-                  title={`Rozet sayısı (Badge count): ${badgeCount}`}
+                  aria-label={`Rozet sayÄ±sÄ± (Badge count): ${badgeCount}`}
+                  title={`Rozet sayÄ±sÄ± (Badge count): ${badgeCount}`}
                 >
                   {badgeCount}
                 </span>
@@ -184,7 +184,7 @@ function Sidebar({ mobileOpen = false, onClose }) {
             </NavLink>
           ))}
 
-          {/* Boşta kalan alt alanı doldur (responsive) */}
+          {/* BoÅŸta kalan alt alanÄ± doldur (responsive) */}
           <div className="mt-auto pb-2 flex items-end justify-center overflow-hidden w-full">
             <div
               className="w-full"
@@ -202,3 +202,4 @@ function Sidebar({ mobileOpen = false, onClose }) {
 }
 
 export default Sidebar;
+

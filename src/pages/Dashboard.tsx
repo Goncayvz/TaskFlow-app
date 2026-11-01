@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import TaskCard from "../components/TaskCard";
 import { useBadge } from "../context/BadgeContext";
 import { useNotification } from "../context/NotificationContext";
+import type { Task } from "../data/types";
 
 function Dashboard() {
   const { checkAndAwardBadges } = useBadge();
   const { addNotification } = useNotification();
 
-  const [tasks, setTasks] = useState(() => {
+  const [tasks, setTasks] = useState<Task[]>(() => {
     const savedTasks = localStorage.getItem("tasks");
 
     return savedTasks
@@ -36,7 +37,7 @@ function Dashboard() {
   const [filter, setFilter] = useState("all");
 
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
 
@@ -44,11 +45,11 @@ function Dashboard() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 
     const completedCount = tasks.filter((t) => t.status === "Completed").length;
-    const newBadges = checkAndAwardBadges(completedCount, tasks.length, { tasks });
+    const newBadges = checkAndAwardBadges(completedCount, tasks.length);
 
     if (newBadges.length > 0) {
       newBadges.forEach((badge) => {
-        addNotification(`🎉 Yeni rozet: ${badge.name}!`, "success", 4000);
+        addNotification(`ğŸ‰ Yeni rozet: ${badge.name}!`, "success", 4000);
       });
     }
   }, [tasks, checkAndAwardBadges, addNotification]);
@@ -67,7 +68,7 @@ function Dashboard() {
       id: Date.now(),
       title: newTitle,
       description: newDesc,
-      status: "In Progress",
+      status: "In Progress" as const,
       deadline: "New"
     };
 
@@ -77,11 +78,11 @@ function Dashboard() {
     setNewDesc("");
   }
 
-  function deleteTask(id) {
+  function deleteTask(id: number) {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   }
 
-  function toggleTaskStatus(id) {
+  function toggleTaskStatus(id: number) {
     setTasks((prev) =>
       prev.map((task) =>
         task.id === id
@@ -94,7 +95,7 @@ function Dashboard() {
     );
   }
 
-  function openEditModal(task) {
+  function openEditModal(task: Task) {
     setSelectedTask(task);
     setEditTitle(task.title);
     setEditDesc(task.description);
@@ -102,6 +103,7 @@ function Dashboard() {
   }
 
   function updateTask() {
+    if (!selectedTask) return;
     setTasks((prev) =>
       prev.map((task) =>
         task.id === selectedTask.id
@@ -237,4 +239,7 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+
+
 

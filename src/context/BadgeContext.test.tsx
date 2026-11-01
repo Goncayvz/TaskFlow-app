@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { getBadgeAwards } from "./BadgeContext.jsx"
+import { getBadgeAwards } from "./BadgeContext"
 
-const getAwardIds = (...args) => getBadgeAwards(...args).map((badge) => badge.id)
+const getAwardIds = (completed: number, total = 0, earned: number[] = []) => getBadgeAwards(completed, total, earned).map((badge) => badge.id)
 
 describe("getBadgeAwards", () => {
   it("awards completion and speed badges for completed tasks", () => {
@@ -16,3 +16,4 @@ describe("getBadgeAwards", () => {
     expect(getAwardIds(10, 10, [])).toEqual(expect.arrayContaining([12, 14]))
   })
 })
+
