@@ -49,7 +49,7 @@ function Dashboard() {
 
     if (newBadges.length > 0) {
       newBadges.forEach((badge) => {
-        addNotification(`ğŸ‰ Yeni rozet: ${badge.name}!`, "success", 4000);
+        addNotification(`🎉 Yeni rozet: ${badge.name}!`, "success", 4000);
       });
     }
   }, [tasks, checkAndAwardBadges, addNotification]);

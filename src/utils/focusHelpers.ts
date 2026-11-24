@@ -1,20 +1,60 @@
-﻿export const getYoutubeEmbedUrl = (url: string): string => {
+
+export const getYoutubeEmbedUrl = (url: string, origin?: string): string => {
   try {
-    const parsed = new URL(url)
+    const parsed = new URL(url.trim())
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "")
+
+    const isYoutubeHost = [
+      "youtube.com",
+      "m.youtube.com",
+      "music.youtube.com",
+      "youtube-nocookie.com"
+    ].includes(hostname)
 
     let videoId = ""
 
-    if (parsed.hostname.includes("youtube.com")) {
-      videoId = parsed.searchParams.get("v") ?? ""
+    const playlistId =
+      isYoutubeHost || hostname === "youtu.be"
+        ? parsed.searchParams.get("list") ?? ""
+        : ""
+
+    if (isYoutubeHost) {
+      videoId =
+        parsed.searchParams.get("v") ??
+        parsed.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/)?.[1] ??
+        ""
+    } else if (hostname === "youtu.be") {
+      videoId = parsed.pathname.split("/")[1] ?? ""
     }
 
-    if (parsed.hostname.includes("youtu.be")) {
-      videoId = parsed.pathname.slice(1)
+    if (!videoId && !playlistId) return ""
+
+    const embeddablePlaylistId = playlistId.startsWith("RD")
+      ? ""
+      : playlistId
+
+    const params = new URLSearchParams({
+      autoplay: "0",
+      mute: "0",
+      controls: "1",
+      modestbranding: "1",
+      enablejsapi: "1",
+      playsinline: "1"
+    })
+
+    if (embeddablePlaylistId) {
+      params.set("listType", "playlist")
+      params.set("list", embeddablePlaylistId)
+    } else if (videoId) {
+      params.set("loop", "1")
+      params.set("playlist", videoId)
     }
 
-    if (!videoId) return ""
+    if (origin) {
+      params.set("origin", origin)
+    }
 
-    return `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=0&loop=1&playlist=${videoId}&controls=1&modestbranding=1&enablejsapi=1`
+    return `https://www.youtube.com/embed/${videoId || "videoseries"}?${params.toString()}`
   } catch {
     return ""
   }
@@ -22,11 +62,18 @@
 
 export const getDirectAudioUrl = (url: string): string => {
   const trimmedUrl = url.trim()
-  if (!trimmedUrl || getYoutubeEmbedUrl(trimmedUrl)) return ""
+
+  if (!trimmedUrl || getYoutubeEmbedUrl(trimmedUrl)) {
+    return ""
+  }
 
   try {
     const parsed = new URL(trimmedUrl)
-    if (!["http:", "https:"].includes(parsed.protocol)) return ""
+
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      return ""
+    }
+
     return trimmedUrl
   } catch {
     return ""
@@ -36,6 +83,6 @@ export const getDirectAudioUrl = (url: string): string => {
 export const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
+
   return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
 }
-

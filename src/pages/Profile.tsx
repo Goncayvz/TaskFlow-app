@@ -1,22 +1,23 @@
 ﻿import { useState } from "react"
+import type { ChangeEvent } from "react"
+import type { Task, User } from "../data/types"
 import { useBadge } from "../context/BadgeContext"
 import { useUser } from "../context/UserContext"
-
 const avatarOptions = [
-  "ğŸ‘¤",
-  "ğŸ§‘",
-  "ğŸ§‘â€ğŸ’»",
-  "ğŸ‘©â€ğŸ’»",
-  "ğŸ§‘â€ğŸ¨",
-  "ğŸ§‘â€ğŸš€",
-  "ğŸ§‘â€ğŸ”§",
-  "ğŸ§‘â€ğŸ«",
-  "ğŸ§‘â€âš•ï¸",
-  "ğŸ‘©â€ğŸ’¼",
-  "ğŸ‘©â€ğŸ¨",
-  "ğŸ‘©â€ğŸ«",
-  "ğŸ‘©â€âš•ï¸",
-  "ğŸ§‘â€ğŸ“"
+  "👤",
+  "🧑",
+  "🧑‍💻",
+  "👩‍💻",
+  "🧑‍🎨",
+  "🧑‍🚀",
+  "🧑‍🔧",
+  "🧑‍🏫",
+  "🧑‍⚕️",
+  "👩‍💼",
+  "👩‍🎨",
+  "👩‍🏫",
+  "👩‍⚕️",
+  "🧑‍🎓"
 ]
 
 function Profile() {
@@ -26,12 +27,12 @@ function Profile() {
   const [formData, setFormData] = useState(user)
 
   const savedTasks = localStorage.getItem("tasks")
-  const tasks = savedTasks ? JSON.parse(savedTasks) : []
+  const tasks:Task[] = savedTasks ? JSON.parse(savedTasks) : []
   const completedTasks = tasks.filter((task) => task.status === "Completed").length
   const inProgressTasks = tasks.filter((task) => task.status === "In Progress").length
   const badgeCount = getEarnedBadgesList().length
 
-  const profileFields = [
+  const profileFields :(keyof User)[]= [
     "name",
     "email",
     "phone",
@@ -46,16 +47,16 @@ function Profile() {
 
   const profileCompletion = Math.round((completedFields / profileFields.length) * 100)
 
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  function handleAvatarSelect(avatar) {
+  function handleAvatarSelect(avatar:string) {
     setFormData((prev) => ({ ...prev, avatar }))
   }
 
-  function handleAvatarUpload(event) {
+  function handleAvatarUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -81,7 +82,7 @@ function Profile() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:p-8">
-      <h1 className="mb-8 text-2xl font-bold sm:text-3xl">KullanÄ±cÄ± Profili (User Profile)</h1>
+      <h1 className="mb-8 text-2xl font-bold sm:text-3xl">Kullanıcı Profili (User Profile)</h1>
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
         <div className="glass-card p-5 sm:p-8 rounded-3xl border border-white/10">
@@ -99,17 +100,17 @@ function Profile() {
             )}
 
             <div className="min-w-0 flex-1">
-              <h2 className="break-words text-2xl font-bold sm:text-3xl">{user.name}</h2>
+              <h2 className="wrap-break-words text-2xl font-bold sm:text-3xl">{user.name}</h2>
               <p className="text-blue-300 text-sm uppercase tracking-wide mb-2">
-                {user.jobTitle || "GÃ¶rev tutkunu (Task enthusiast)"}
+                {user.jobTitle || "Görev tutkunu (Task enthusiast)"}
               </p>
-              <p className="break-words leading-7 text-zinc-300">{user.bio}</p>
+              <p className="wrap-break-words leading-7 text-zinc-300">{user.bio}</p>
             </div>
           </div>
 
           <div className="grid gap-4 mt-8 sm:grid-cols-2 xl:grid-cols-4">
             <div className="glass-card p-5 rounded-3xl border border-white/10">
-              <p className="text-zinc-400 text-sm">Tamamlanan GÃ¶revler (Completed Tasks)</p>
+              <p className="text-zinc-400 text-sm">Tamamlanan Görevler (Completed Tasks)</p>
               <p className="text-3xl font-semibold mt-3">{completedTasks}</p>
             </div>
             <div className="glass-card p-5 rounded-3xl border border-white/10">
@@ -117,11 +118,11 @@ function Profile() {
               <p className="text-3xl font-semibold mt-3">{inProgressTasks}</p>
             </div>
             <div className="glass-card p-5 rounded-3xl border border-white/10">
-              <p className="text-zinc-400 text-sm">KazandÄ±ÄŸÄ±n Rozetler (Earned Badges)</p>
+              <p className="text-zinc-400 text-sm">Kazandığın Rozetler (Earned Badges)</p>
               <p className="text-3xl font-semibold mt-3">{badgeCount}</p>
             </div>
             <div className="glass-card p-5 rounded-3xl border border-white/10">
-              <p className="text-zinc-400 text-sm">Profil TamamlanmasÄ± (Profile Completion)</p>
+              <p className="text-zinc-400 text-sm">Profil Tamamlanması (Profile Completion)</p>
               <p className="text-3xl font-semibold mt-3">{profileCompletion}%</p>
             </div>
           </div>
@@ -133,7 +134,7 @@ function Profile() {
             </div>
             <div className="h-3 rounded-full bg-white/10 overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300"
+                className="h-full rounded-full bg-linearnpm run typecheck-to-r from-blue-500 to-cyan-400 transition-all duration-300"
                 style={{ width: `${profileCompletion}%` }}
               />
             </div>
@@ -143,17 +144,17 @@ function Profile() {
         <div className="glass-card p-5 sm:p-8 rounded-3xl border border-white/10">
           {!isEditing ? (
             <>
-              <h2 className="text-2xl font-bold mb-6">Profil DetaylarÄ± (Profile Details)</h2>
+              <h2 className="text-2xl font-bold mb-6">Profil Detayları (Profile Details)</h2>
 
               <div className="grid gap-5">
                 <div className="grid gap-2">
                   <span className="text-zinc-400 text-sm">E-posta (Email)</span>
-                  <p className="break-words text-white">{user.email}</p>
+                  <p className="wrap-break-words text-white">{user.email}</p>
                 </div>
 
                 <div className="grid gap-2">
                   <span className="text-zinc-400 text-sm">Telefon (Phone)</span>
-                  <p className="break-words text-white">{user.phone}</p>
+                  <p className="wrap-break-words text-white">{user.phone}</p>
                 </div>
               </div>
 
@@ -164,12 +165,12 @@ function Profile() {
                 }}
                 className="mt-8 w-full bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-3xl"
               >
-                Profili DÃ¼zenle (Edit Profile)
+                Profili Düzenle (Edit Profile)
               </button>
             </>
           ) : (
             <>
-              <h2 className="text-2xl font-bold mb-6">Profili DÃ¼zenle (Edit Profile)</h2>
+              <h2 className="text-2xl font-bold mb-6">Profili Düzenle (Edit Profile)</h2>
 
               <div className="space-y-4">
                 <div>
@@ -228,7 +229,7 @@ function Profile() {
                 </div>
 
                 <div className="grid gap-2">
-                  <label className="block text-zinc-400 text-sm mb-2">Avatar SeÃ§imi (Avatar Selection)</label>
+                  <label className="block text-zinc-400 text-sm mb-2">Avatar Seçimi (Avatar Selection)</label>
                   <div className="flex flex-wrap gap-2">
                     {avatarOptions.map((avatar) => (
                       <button
@@ -248,7 +249,7 @@ function Profile() {
                 </div>
 
                 <div>
-                  <label className="block text-zinc-400 text-sm mb-2">Profil FotoÄŸrafÄ± YÃ¼kle (Upload Profile Photo)</label>
+                  <label className="block text-zinc-400 text-sm mb-2">Profil Fotoğrafı Yükle (Upload Profile Photo)</label>
                   <input
                     type="file"
                     accept="image/*"
@@ -258,7 +259,7 @@ function Profile() {
                   {formData.avatar?.startsWith("data:image") && (
                     <img
                       src={formData.avatar}
-                      alt="Avatar Ã¶nizleme (Avatar preview)"
+                      alt="Avatar önizleme (Avatar preview)"
                       className="mt-3 w-24 h-24 rounded-full object-cover border border-white/10"
                     />
                   )}
@@ -277,7 +278,7 @@ function Profile() {
                   onClick={handleCancel}
                   className="flex-1 bg-red-500 hover:bg-red-600 px-6 py-3 rounded-3xl"
                 >
-                  Ä°ptal (Cancel)
+                  İptal (Cancel)
                 </button>
               </div>
             </>

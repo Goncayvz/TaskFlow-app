@@ -9,145 +9,145 @@ const BadgeContext = createContext<BadgeContextValue | null>(null)
 export const BADGES: Badge[] = [
   {
     id: 1,
-    name: "Ä°lk AdÄ±m (First Step)",
-    description: "1 gÃ¶revi tamamla (Complete 1 task)",
-    icon: "ğŸ¯",
+    name: "İlk Adım (First Step)",
+    description: "1 görevi tamamla (Complete 1 task)",
+    icon: "🎯",
     threshold: 1,
     category: "completions"
   },
   {
     id: 2,
-    name: "Bronz BaÅŸarÄ± (Bronze Achievement)",
-    description: "5 gÃ¶revi tamamla (Complete 5 tasks)",
-    icon: "ğŸ¥‰",
+    name: "Bronz Başarı (Bronze Achievement)",
+    description: "5 görevi tamamla (Complete 5 tasks)",
+    icon: "🥉",
     threshold: 5,
     category: "completions"
   },
   {
     id: 3,
-    name: "GÃ¼mÃ¼ÅŸ BaÅŸarÄ± (Silver Achievement)",
-    description: "10 gÃ¶revi tamamla (Complete 10 tasks)",
-    icon: "ğŸ¥ˆ",
+    name: "Gümüş Başarı (Silver Achievement)",
+    description: "10 görevi tamamla (Complete 10 tasks)",
+    icon: "🥈",
     threshold: 10,
     category: "completions"
   },
   {
     id: 4,
-    name: "AltÄ±n BaÅŸarÄ± (Gold Achievement)",
-    description: "20 gÃ¶revi tamamla (Complete 20 tasks)",
-    icon: "ğŸ¥‡",
+    name: "Altın Başarı (Gold Achievement)",
+    description: "20 görevi tamamla (Complete 20 tasks)",
+    icon: "🥇",
     threshold: 20,
     category: "completions"
   },
   {
     id: 5,
-    name: "Elmas BaÅŸarÄ± (Diamond Achievement)",
-    description: "50 gÃ¶revi tamamla (Complete 50 tasks)",
-    icon: "ğŸ’",
+    name: "Elmas Başarı (Diamond Achievement)",
+    description: "50 görevi tamamla (Complete 50 tasks)",
+    icon: "💎",
     threshold: 50,
     category: "completions"
   },
   {
     id: 6,
-    name: "HÄ±z UstasÄ± (Speed Master)",
-    description: "2 gÃ¶revi tamamla (Complete 2 tasks)",
-    icon: "âš¡",
+    name: "Hız Ustası (Speed Master)",
+    description: "2 görevi tamamla (Complete 2 tasks)",
+    icon: "⚡",
     threshold: 2,
     category: "speed"
   },
   {
     id: 7,
-    name: "HÄ±z Åampiyonu (Speed Champion)",
-    description: "5 gÃ¶revi tamamla (Complete 5 tasks)",
-    icon: "ğŸš€",
+    name: "Hız Şampiyonu (Speed Champion)",
+    description: "5 görevi tamamla (Complete 5 tasks)",
+    icon: "🚀",
     threshold: 5,
     category: "speed"
   },
   {
     id: 8,
-    name: "Temizlik UstasÄ± (Cleanup Master)",
-    description: "TÃ¼m gÃ¶revleri tamamla (Complete all tasks)",
-    icon: "âœ¨",
+    name: "Temizlik Ustası (Cleanup Master)",
+    description: "Tüm görevleri tamamla (Complete all tasks)",
+    icon: "✨",
     threshold: 100,
     category: "cleanup"
   },
   {
     id: 9,
-    name: "TasarÄ±mcÄ± (Designer)",
-    description: "UI Design System gÃ¶revini tamamla (Complete the UI Design System task)",
-    icon: "ğŸ¨",
+    name: "Tasarımcı (Designer)",
+    description: "UI Design System görevini tamamla (Complete the UI Design System task)",
+    icon: "🎨",
     threshold: 1,
     category: "specific"
   },
   {
     id: 10,
-    name: "GÃ¼venlik UzmanÄ± (Security Expert)",
-    description: "Authentication gÃ¶revini tamamla (Complete the Authentication task)",
-    icon: "ğŸ”",
+    name: "Güvenlik Uzmanı (Security Expert)",
+    description: "Authentication görevini tamamla (Complete the Authentication task)",
+    icon: "🔐",
     threshold: 1,
     category: "specific"
   },
   {
     id: 11,
-    name: "Verimli GÃ¼n (Productive Day)",
-    description: "3 gÃ¶revi aynÄ± gÃ¼nde tamamla (Complete 3 tasks in one day)",
-    icon: "â˜€ï¸",
+    name: "Verimli Gün (Productive Day)",
+    description: "3 görevi aynı günde tamamla (Complete 3 tasks in one day)",
+    icon: "☀️",
     threshold: 3,
     category: "daily"
   },
   {
     id: 12,
-    name: "Ä°ÅŸ DiyarÄ± (Task Realm)",
-    description: "10 gÃ¶rev ekle (Add 10 tasks)",
-    icon: "ğŸ“‹",
+    name: "İş Diyarı (Task Realm)",
+    description: "10 görev ekle (Add 10 tasks)",
+    icon: "📋",
     threshold: 10,
     category: "created"
   },
   {
     id: 13,
-    name: "Ekibin KahramanÄ± (Team Hero)",
-    description: "5 gÃ¼n Ã¼st Ã¼ste aktif ol (Be active for 5 days in a row)",
-    icon: "ğŸ¦¸",
+    name: "Ekibin Kahramanı (Team Hero)",
+    description: "5 gün üst üste aktif ol (Be active for 5 days in a row)",
+    icon: "🦸",
     threshold: 5,
     category: "streak"
   },
   {
     id: 14,
-    name: "MÃ¼kemmeliyetÃ§i (Perfectionist)",
-    description: "100% gÃ¶rev baÅŸarÄ± oranÄ± (100% task success rate)",
-    icon: "ğŸ’¯",
+    name: "Mükemmeliyetçi (Perfectionist)",
+    description: "100% görev başarı oranı (100% task success rate)",
+    icon: "💯",
     threshold: 100,
     category: "perfect"
   },
   {
     id: 15,
-    name: "SÃ¼per VerimliliÄŸi (Super Productivity)",
-    description: "30 gÃ¶rev tamamla (Complete 30 tasks)",
-    icon: "ğŸŒŸ",
+    name: "Süper Verimliliği (Super Productivity)",
+    description: "30 görev tamamla (Complete 30 tasks)",
+    icon: "🌟",
     threshold: 30,
     category: "completions"
   },
   {
     id: 16,
     name: "Lider (Leader)",
-    description: "100 gÃ¶rev tamamla (Complete 100 tasks)",
-    icon: "ğŸ‘‘",
+    description: "100 görev tamamla (Complete 100 tasks)",
+    icon: "👑",
     threshold: 100,
     category: "completions"
   },
   {
     id: 17,
-    name: "Zaman YÃ¶neticisi (Time Manager)",
-    description: "HiÃ§ gecikmiÅŸ gÃ¶rev yapma (Do not create overdue tasks)",
-    icon: "â°",
+    name: "Zaman Yöneticisi (Time Manager)",
+    description: "Hiç gecikmiş görev yapma (Do not create overdue tasks)",
+    icon: "⏰",
     threshold: 1,
     category: "ontime"
   },
   {
     id: 18,
-    name: "Dikkat MeraklÄ±sÄ± (Detail Seeker)",
-    description: "Ã‡ok detaylÄ± gÃ¶rev aÃ§Ä±klamasÄ± ekle (Add a very detailed task description)",
-    icon: "ğŸ”",
+    name: "Dikkat Meraklısı (Detail Seeker)",
+    description: "Çok detaylı görev açıklaması ekle (Add a very detailed task description)",
+    icon: "🔍",
     threshold: 1,
     category: "detail"
   },
@@ -155,15 +155,15 @@ export const BADGES: Badge[] = [
     id: 19,
     name: "Sosyal Kelebek (Social Butterfly)",
     description: "Yeni profil bilgileri ekle (Add new profile information)",
-    icon: "ğŸ¦‹",
+    icon: "🦋",
     threshold: 1,
     category: "social"
   },
   {
     id: 20,
-    name: "BaÅŸlangÄ±Ã§ UstasÄ± (Setup Master)",
-    description: "Profil ve ayarlarÄ±nÄ± tamamla (Complete your profile and settings)",
-    icon: "ğŸš€",
+    name: "Başlangıç Ustası (Setup Master)",
+    description: "Profil ve ayarlarını tamamla (Complete your profile and settings)",
+    icon: "🚀",
     threshold: 1,
     category: "setup"
   }
@@ -212,7 +212,7 @@ export function BadgeProvider({ children }: PropsWithChildren) {
   function checkAndAwardBadges(completedCount: number, totalCount = 0): Badge[] {
     const newBadges: Badge[] = []
     
-    // Tamamlama sayÄ±sÄ±na gÃ¶re
+    // Tamamlama sayısına göre
     BADGES
       .filter((badge) => badge.category === "completions" && completedCount >= badge.threshold && !earnedBadges.includes(badge.id))
       .forEach((badge) => {
@@ -220,7 +220,7 @@ export function BadgeProvider({ children }: PropsWithChildren) {
         newBadges.push(badge)
       })
 
-    // HÄ±z rozetleri (tamamlama sayÄ±sÄ±na gÃ¶re)
+    // Hız rozetleri (tamamlama sayısına göre)
     BADGES
       .filter((badge) => badge.category === "speed" && completedCount >= badge.threshold && !earnedBadges.includes(badge.id))
       .forEach((badge) => {
@@ -228,7 +228,7 @@ export function BadgeProvider({ children }: PropsWithChildren) {
         newBadges.push(badge)
       })
 
-    // MÃ¼kemmellik (100% tamamlama oranÄ±)
+    // Mükemmellik (100% tamamlama oranı)
     if (totalCount > 0 && completedCount === totalCount && totalCount >= 5) {
       const perfectBadge = BADGES.find(b => b.id === 14)
       if (perfectBadge && !earnedBadges.includes(14)) {
@@ -237,7 +237,7 @@ export function BadgeProvider({ children }: PropsWithChildren) {
       }
     }
 
-    // Ä°ÅŸ DiyarÄ± (10+ gÃ¶rev oluÅŸturulmuÅŸ)
+    // İş Diyarı (10+ görev oluşturulmuş)
     if (totalCount >= 10) {
       const creatorBadge = BADGES.find(b => b.id === 12)
       if (creatorBadge && !earnedBadges.includes(12)) {

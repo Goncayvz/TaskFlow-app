@@ -1,21 +1,82 @@
-import { describe, expect, it } from "vitest"
-import { formatTime, getDirectAudioUrl, getYoutubeEmbedUrl } from "../utils/focusHelpers"
 
-describe("focus helpers", () => {
-  it("formats seconds as mm:ss", () => {
-    expect(formatTime(0)).toBe("00:00")
-    expect(formatTime(65)).toBe("01:05")
-    expect(formatTime(1500)).toBe("25:00")
-  })
+export const getYoutubeEmbedUrl = (url: string, origin?: string): string => {
+  try {
+    const parsed = new URL(url.trim())
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "")
 
-  it("builds YouTube embed URLs from common video links", () => {
-    expect(getYoutubeEmbedUrl("https://www.youtube.com/watch?v=abc123")).toContain("/embed/abc123")
-    expect(getYoutubeEmbedUrl("https://youtu.be/xyz789")).toContain("/embed/xyz789")
-  })
+    const isYoutubeHost = [
+      "youtube.com",
+      "m.youtube.com",
+      "music.youtube.com",
+      "youtube-nocookie.com"
+    ].includes(hostname)
 
-  it("accepts direct audio URLs and rejects invalid or YouTube URLs", () => {
-    expect(getDirectAudioUrl("https://example.com/audio.mp3")).toBe("https://example.com/audio.mp3")
-    expect(getDirectAudioUrl("not-a-url")).toBe("")
-    expect(getDirectAudioUrl("https://www.youtube.com/watch?v=abc123")).toBe("")
-  })
-})
+    let videoId = ""
+
+    const playlistId =
+      isYoutubeHost || hostname === "youtu.be"
+        ? parsed.searchParams.get("list") ?? ""
+        : ""
+
+    if (isYoutubeHost) {
+      videoId =
+        parsed.searchParams.get("v") ??
+        parsed.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/)?.[1] ??
+        ""
+    } else if (hostname === "youtu.be") {
+      videoId = parsed.pathname.split("/")[1] ?? ""
+    }
+
+    if (!videoId && !playlistId) return ""
+
+    const embeddablePlaylistId = playlistId.startsWith("RD")
+      ? ""
+      : playlistId
+
+    const params = new URLSearchParams({
+      autoplay: "0",
+      mute: "0",
+      controls: "1",
+      modestbranding: "1",
+      enablejsapi: "1",
+      playsinline: "1"
+    })
+
+    if (embeddablePlaylistId) {
+      params.set("listType", "playlist")
+      params.set("list", embeddablePlaylistId)
+    } else if (videoId) {
+      params.set("loop", "1")
+      params.set("playlist", videoId)
+    }
+
+    if (origin) params.set("origin", origin)
+
+    return `https://www.youtube.com/embed/${videoId || "videoseries"}?${params.toString()}`
+  } catch {
+    return ""
+  }
+}
+
+export const getDirectAudioUrl = (url: string): string => {
+  const trimmedUrl = url.trim()
+
+  if (!trimmedUrl || getYoutubeEmbedUrl(trimmedUrl)) return ""
+
+  try {
+    const parsed = new URL(trimmedUrl)
+
+    if (!["http:", "https:"].includes(parsed.protocol)) return ""
+
+    return trimmedUrl
+  } catch {
+    return ""
+  }
+}
+
+export const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+}

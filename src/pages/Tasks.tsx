@@ -42,19 +42,19 @@ function Tasks() {
     const completedCount = tasks.filter(t => t.status === "Completed").length
     const newBadges = checkAndAwardBadges(completedCount, tasks.length)
 
-    // Yeni rozetler kazanÄ±ldÄ±ysa bildirim gÃ¶ster
+    // Yeni rozetler kazanıldıysa bildirim göster
     if (newBadges.length > 0) {
       newBadges.forEach((badge) => {
-        addNotification(`ğŸ‰ Yeni rozet: ${badge.name}!`, "success", 4000)
+        addNotification(`🎉 Yeni rozet: ${badge.name}!`, "success", 4000)
       })
     }
   }, [tasks, checkAndAwardBadges, addNotification])
 
-  function deleteTask(id) {
+  function deleteTask(id:Task["id"]) {
     setTasks((prev) => prev.filter((t) => t.id !== id))
   }
 
-  function toggleStatus(id) {
+  function toggleStatus(id: Task["id"]) {
     setTasks((prev) =>
       prev.map((t) =>
         t.id === id
@@ -64,7 +64,7 @@ function Tasks() {
     )
   }
 
-  function openEditModal(task) {
+  function openEditModal(task:Task) {
     setSelectedTask(task)
     setEditTitle(task.title)
     setEditDesc(task.description)
@@ -110,20 +110,20 @@ function Tasks() {
       {isEditing && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
           <div className="bg-zinc-900 p-6 rounded-lg w-[92vw] max-w-md border border-white/10">
-            <h2 className="text-xl mb-4 font-semibold">GÃ¶revi DÃ¼zenle (Edit Task)</h2>
+            <h2 className="text-xl mb-4 font-semibold">Görevi Düzenle (Edit Task)</h2>
 
             <input
               className="w-full mb-3 p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              placeholder="BaÅŸlÄ±k (Title)"
+              placeholder="Başlık (Title)"
             />
 
             <input
               className="w-full mb-4 p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white"
               value={editDesc}
               onChange={(e) => setEditDesc(e.target.value)}
-              placeholder="AÃ§Ä±klama (Description)"
+              placeholder="Açıklama (Description)"
             />
 
             <div className="flex flex-col sm:flex-row gap-2">
@@ -138,7 +138,7 @@ function Tasks() {
                 }}
                 className="bg-red-500 px-4 py-2 rounded w-full sm:w-auto"
               >
-                Ä°ptal (Cancel)
+                İptal (Cancel)
               </button>
             </div>
           </div>
