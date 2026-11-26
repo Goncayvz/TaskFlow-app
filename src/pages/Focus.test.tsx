@@ -1,4 +1,3 @@
-
 export const getYoutubeEmbedUrl = (url: string, origin?: string): string => {
   try {
     const parsed = new URL(url.trim())

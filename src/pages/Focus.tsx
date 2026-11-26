@@ -3,8 +3,12 @@ import { useNotification } from "../context/NotificationContext"
 import { formatTime, getDirectAudioUrl, getYoutubeEmbedUrl } from "../utils/focusHelpers"
 import "../styles/focus-mode.css"
 
-interface YouTubePlayer { setVolume: (volume: number) => void; destroy: () => void; playVideo: () => void; pauseVideo: () => void; mute: () => void; unMute: () => void }
-
+type YouTubeReadyEvent = {
+  target: {
+    playVideo: () => void
+    pauseVideo: () => void
+  }
+}
 const PRESETS = {
   pomodoro: { work: 25, shortBreak: 5, longBreak: 15 },
   quick: { work: 15, shortBreak: 5, longBreak: 10 },
@@ -114,7 +118,6 @@ function Focus() {
   const [ambientVolume, setAmbientVolume] = useState(initialSettings.ambientVolume)
   const [soundOn, setSoundOn] = useState(true)
   const [bgSoundOn, setBgSoundOn] = useState(initialSettings.bgSoundOn)
-  const [audioError, setAudioError] = useState("")
 
   // User-provided YouTube link
   const [youtubeUrl, setYoutubeUrl] = useState(initialSettings.youtubeUrl)
@@ -122,13 +125,16 @@ function Focus() {
   const ambientAudioRef = useRef<HTMLAudioElement | null>(null)
   const ambientVolumeRafRef = useRef<number | null>(null)
 
-  const ytPlayerRef = useRef<YouTubePlayer | null>(null)
+const ytPlayerRef = useRef<{
+  setVolume: (volume: number) => void
+  destroy: () => void
+  playVideo: () => void
+  pauseVideo: () => void
+} | null>(null)
   const ytReadyRef = useRef(false)
-  const ytPlayerReadyRef = useRef(false)
   const ytPlayerBuiltForUrlRef = useRef("")
   const ytVolumeRef = useRef(ambientVolume)
   const shouldPlayYoutubeRef = useRef(false)
-  const youtubeApiCallbackRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     localStorage.setItem(
@@ -172,7 +178,7 @@ function Focus() {
 
   const setYoutubeVolume = useCallback((volume:number) => {
     const player = ytPlayerRef.current
-    if (!player) return
+    if (!player || typeof player.setVolume !== "function") return
 
     try {
       player.setVolume(Math.round(Math.max(0, Math.min(1, volume)) * 100))
@@ -195,7 +201,7 @@ function Focus() {
       tag.id = "youtube-iframe-api"
       tag.src = "https://www.youtube.com/iframe_api"
       const firstScriptTag = document.getElementsByTagName("script")[0]
-      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag)
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag)
     }
 
     window.onYouTubeIframeAPIReady = () => {
@@ -206,7 +212,7 @@ function Focus() {
   useEffect(() => {
     if (typeof window === "undefined") return
 
-    if (ytPlayerRef.current) {
+    if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === "function") {
       try {
         ytPlayerRef.current.destroy()
       } catch {
@@ -226,7 +232,7 @@ function Focus() {
       try {
         ytPlayerRef.current = new window.YT.Player(el, {
           events: {
-            onReady: (event: { target: YouTubePlayer }) => {
+            onReady: (event: YouTubeReadyEvent) => {
               ytPlayerBuiltForUrlRef.current = youtubeEmbedUrl
               setYoutubeVolume(ytVolumeRef.current)
 
@@ -341,7 +347,7 @@ function Focus() {
   }, [])
 
   const playTone = useCallback(
-    (frequency: number, duration = 0.16, type: OscillatorType = "sine") => {
+    (frequency: number, duration: number = 0.16, type: OscillatorType = "sine") => {
       if (!soundOn) return
       if (typeof window === "undefined") return
 
@@ -349,9 +355,9 @@ function Focus() {
         const AudioContext = window.AudioContext || window.webkitAudioContext
         const audioCtx = new AudioContext()
         const oscillator = audioCtx.createOscillator()
+        oscillator.type = type
         const gainNode = audioCtx.createGain()
 
-        oscillator.type = type
         oscillator.frequency.value = frequency
         oscillator.connect(gainNode)
         gainNode.connect(audioCtx.destination)
@@ -387,7 +393,7 @@ function Focus() {
   )
 
   const playSound = useCallback(
-    (type:keyof typeof SOUND_TYPES) => {
+    (type: "warning" | "chime" | "soft" | "digital" | "work" | "break") => {
       if (!soundOn) return
 
       if (type === "warning") {
@@ -845,7 +851,7 @@ function Focus() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.03] px-4 py-6 text-center text-sm text-zinc-400">
+                <div className="rounded-2xl border border-dashed border-white/10 bg-white/3] px-4 py-6 text-center text-sm text-zinc-400">
                   İlk çalışma oturumunu tamamladığında burada görünecek. (It will appear here after your first work session.)
                 </div>
               )}
@@ -1028,7 +1034,3 @@ function Focus() {
 }
 
 export default Focus
-
-
-
-
