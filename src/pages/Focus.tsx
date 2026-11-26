@@ -3,12 +3,61 @@ import { useNotification } from "../context/NotificationContext"
 import { formatTime, getDirectAudioUrl, getYoutubeEmbedUrl } from "../utils/focusHelpers"
 import "../styles/focus-mode.css"
 
-type YouTubeReadyEvent = {
-  target: {
-    playVideo: () => void
-    pauseVideo: () => void
+type PresetKey = keyof typeof PRESETS
+type FocusMode = PresetKey | "custom"
+type SoundKey = keyof typeof SOUND_TYPES
+
+type CompletedPomodoro = {
+  id: string
+  completedAt: string
+  minutes: number
+  mode: string
+}
+
+type FocusSettings = {
+  mode: FocusMode
+  workMinutes: number
+  shortBreakMinutes: number
+  longBreakMinutes: number
+  isWorkSession: boolean
+  secondsLeft: number
+  cycleCount: number
+  soundType: SoundKey
+  ambientVolume: number
+  bgSoundOn: boolean
+  youtubeUrl: string
+}
+
+interface YouTubePlayer {
+  setVolume(volume: number): void
+  unMute(): void
+  playVideo(): void
+  pauseVideo(): void
+  destroy(): void
+}
+
+interface YouTubePlayerEvent {
+  target: YouTubePlayer
+  data?: number
+}
+
+declare global {
+  interface Window {
+      Player: new (
+        element: HTMLElement,
+        options: {
+          events: {
+            onReady: (event: YouTubePlayerEvent) => void
+            onError?: (event: YouTubePlayerEvent) => void
+          }
+        }
+      ) => YouTubePlayer
+    
+    onYouTubeIframeAPIReady?: () => void
+    webkitAudioContext?: typeof AudioContext
   }
 }
+
 const PRESETS = {
   pomodoro: { work: 25, shortBreak: 5, longBreak: 15 },
   quick: { work: 15, shortBreak: 5, longBreak: 10 },
@@ -39,9 +88,9 @@ const SOUND_TYPES = {
   soft: { label: "Yumuşak (Soft)", key: "soft" },
   digital: { label: "Dijital", key: "digital" },
   none: { label: "Sessiz (Silent)", key: "none" }
-}
+}as const
 
-const formatCompletedTime = (dateString:string) => {
+const formatCompletedTime = (dateString: string) => {
   try {
     return new Intl.DateTimeFormat("tr-TR", {
       hour: "2-digit",
@@ -52,19 +101,19 @@ const formatCompletedTime = (dateString:string) => {
   }
 }
 
-const loadCompletedPomodoros = () => {
+const loadCompletedPomodoros = (): CompletedPomodoro[] => {
   if (typeof window === "undefined") return []
 
   try {
     const saved = localStorage.getItem("focus-completed-pomodoros")
     const parsed = saved ? JSON.parse(saved) : []
-    return Array.isArray(parsed) ? parsed.slice(0, 8) : []
+    return Array.isArray(parsed) ? (parsed as CompletedPomodoro[]).slice(0, 8) : []
   } catch {
     return []
   }
 }
 
-const defaultSettings = {
+const defaultSettings: FocusSettings = {
   mode: "pomodoro",
   workMinutes: 25,
   shortBreakMinutes: 5,
@@ -80,12 +129,12 @@ const defaultSettings = {
   youtubeUrl: ""
 }
 
-const loadFocusSettings = () => {
+const loadFocusSettings = (): FocusSettings => {
   if (typeof window === "undefined") return { ...defaultSettings }
 
   try {
     const saved = localStorage.getItem("focus-settings")
-    const parsed = saved ? JSON.parse(saved) : {}
+    const parsed: Partial<FocusSettings> = saved ? JSON.parse(saved) as Partial<FocusSettings> : {}
 
     return {
       ...defaultSettings,
@@ -102,7 +151,7 @@ function Focus() {
   const { addNotification } = useNotification()
   const initialSettings = loadFocusSettings()
 
-  const [mode, setMode] = useState(initialSettings.mode)
+  const [mode, setMode] = useState<FocusMode>(initialSettings.mode)
   const [workMinutes, setWorkMinutes] = useState(initialSettings.workMinutes)
   const [shortBreakMinutes, setShortBreakMinutes] = useState(initialSettings.shortBreakMinutes)
   const [longBreakMinutes, setLongBreakMinutes] = useState(initialSettings.longBreakMinutes)
@@ -110,11 +159,11 @@ function Focus() {
   const [secondsLeft, setSecondsLeft] = useState(initialSettings.secondsLeft)
   const [isRunning, setIsRunning] = useState(false)
   const [cycleCount, setCycleCount] = useState(initialSettings.cycleCount)
-  const [completedPomodoros, setCompletedPomodoros] = useState(loadCompletedPomodoros)
-  const [customWork, setCustomWork] = useState(initialSettings.workMinutes)
-  const [customShortBreak, setCustomShortBreak] = useState(initialSettings.shortBreakMinutes)
-  const [customLongBreak, setCustomLongBreak] = useState(initialSettings.longBreakMinutes)
-  const [soundType, setSoundType] = useState(initialSettings.soundType)
+  const [completedPomodoros, setCompletedPomodoros] = useState<CompletedPomodoro[]>(loadCompletedPomodoros)
+  const [customWork, setCustomWork] = useState<number | string>(initialSettings.workMinutes)
+  const [customShortBreak, setCustomShortBreak] = useState<number | string>(initialSettings.shortBreakMinutes)
+  const [customLongBreak, setCustomLongBreak] = useState<number | string>(initialSettings.longBreakMinutes)
+  const [soundType, setSoundType] = useState<SoundKey>(initialSettings.soundType)
   const [ambientVolume, setAmbientVolume] = useState(initialSettings.ambientVolume)
   const [soundOn, setSoundOn] = useState(true)
   const [bgSoundOn, setBgSoundOn] = useState(initialSettings.bgSoundOn)
@@ -125,16 +174,11 @@ function Focus() {
   const ambientAudioRef = useRef<HTMLAudioElement | null>(null)
   const ambientVolumeRafRef = useRef<number | null>(null)
 
-const ytPlayerRef = useRef<{
-  setVolume: (volume: number) => void
-  destroy: () => void
-  playVideo: () => void
-  pauseVideo: () => void
-} | null>(null)
-  const ytReadyRef = useRef(false)
-  const ytPlayerBuiltForUrlRef = useRef("")
-  const ytVolumeRef = useRef(ambientVolume)
-  const shouldPlayYoutubeRef = useRef(false)
+  const ytPlayerRef = useRef<YouTubePlayer | null>(null)
+  const ytReadyRef = useRef<boolean>(false)
+  const ytPlayerBuiltForUrlRef = useRef<string>("")
+  const ytVolumeRef = useRef<number>(ambientVolume)
+  const shouldPlayYoutubeRef = useRef<boolean>(false)
 
   useEffect(() => {
     localStorage.setItem(
@@ -161,14 +205,28 @@ const ytPlayerRef = useRef<{
     return getYoutubeEmbedUrl(youtubeUrl.trim())
   }, [youtubeUrl])
 
+  const youtubePlayerUrl = useMemo(() => {
+    if (!youtubeEmbedUrl || typeof window === "undefined") return ""
+
+    try {
+      const url = new URL(youtubeEmbedUrl)
+      // IFrame Player API'nin mevcut iframe'i kontrol edebilmesi için gereklidir.
+      url.searchParams.set("enablejsapi", "1")
+      url.searchParams.set("origin", window.location.origin)
+      return url.toString()
+    } catch {
+      return youtubeEmbedUrl
+    }
+  }, [youtubeEmbedUrl])
+
   const directAudioUrl = useMemo(() => {
     if (!youtubeUrl || typeof window === "undefined") return ""
     return getDirectAudioUrl(youtubeUrl)
   }, [youtubeUrl])
 
   const youtubeIframeKey = useMemo(() => {
-    return youtubeEmbedUrl || "empty-youtube-url"
-  }, [youtubeEmbedUrl])
+    return youtubePlayerUrl || "empty-youtube-url"
+  }, [youtubePlayerUrl])
 
   const shouldPlayYoutube = isWorkSession && isRunning && bgSoundOn && !!(youtubeEmbedUrl && youtubeEmbedUrl.trim())
 
@@ -176,7 +234,7 @@ const ytPlayerRef = useRef<{
     shouldPlayYoutubeRef.current = shouldPlayYoutube
   }, [shouldPlayYoutube])
 
-  const setYoutubeVolume = useCallback((volume:number) => {
+  const setYoutubeVolume = useCallback((volume: number) => {
     const player = ytPlayerRef.current
     if (!player || typeof player.setVolume !== "function") return
 
@@ -187,57 +245,42 @@ const ytPlayerRef = useRef<{
     }
   }, [])
 
-  // YouTube IFrame API yükleme
+  // YouTube IFrame API yükleme ve oynatıcıyı güvenli şekilde oluşturma
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined" || !youtubePlayerUrl) return
 
-    if (window.YT?.Player) {
-      ytReadyRef.current = true
-      return
-    }
-
-    if (!document.getElementById("youtube-iframe-api")) {
-      const tag = document.createElement("script")
-      tag.id = "youtube-iframe-api"
-      tag.src = "https://www.youtube.com/iframe_api"
-      const firstScriptTag = document.getElementsByTagName("script")[0]
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag)
-    }
-
-    window.onYouTubeIframeAPIReady = () => {
-      ytReadyRef.current = true
-    }
-  }, [])
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
-
-    if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === "function") {
-      try {
-        ytPlayerRef.current.destroy()
-      } catch {
-        // ignore
-      }
-    }
-
-    ytPlayerRef.current = null
-    ytPlayerBuiltForUrlRef.current = ""
-
-    if (!youtubeEmbedUrl) return
+    let cancelled = false
+    let playerInstance: YouTubePlayer | null = null
 
     const buildPlayer = () => {
-      const el = document.getElementById("youtube-ambient-iframe")
-      if (!el || el.tagName !== "IFRAME" || !window.YT?.Player || ytPlayerRef.current) return
+      if (cancelled || !window.YT?.Player) return
+
+      const iframe = document.getElementById("youtube-ambient-iframe")
+      if (!iframe || iframe.tagName !== "IFRAME") return
+      if (ytPlayerRef.current) return
 
       try {
-        ytPlayerRef.current = new window.YT.Player(el, {
+        playerInstance = new window.YT.Player(iframe, {
           events: {
-            onReady: (event: YouTubeReadyEvent) => {
-              ytPlayerBuiltForUrlRef.current = youtubeEmbedUrl
+            onReady: (event: YouTubePlayerEvent) => {
+              if (cancelled) {
+                try {
+                  event.target.destroy()
+                } catch {
+                  // ignore
+                }
+                return
+              }
+
+              ytPlayerRef.current = event.target
+              ytReadyRef.current = true
+              ytPlayerBuiltForUrlRef.current = youtubePlayerUrl
               setYoutubeVolume(ytVolumeRef.current)
 
               try {
                 if (shouldPlayYoutubeRef.current) {
+                  event.target.unMute()
+                  event.target.setVolume(Math.round(Math.max(0, Math.min(1, ytVolumeRef.current)) * 100))
                   event.target.playVideo()
                 } else {
                   event.target.pauseVideo()
@@ -245,26 +288,64 @@ const ytPlayerRef = useRef<{
               } catch {
                 // ignore
               }
+            },
+            onError: (event: YouTubePlayerEvent) => {
+              console.warn("YouTube player error:", event.data)
             }
           }
         })
-      } catch {
-        // ignore
+
+        ytPlayerRef.current = playerInstance
+      } catch (error: unknown) {
+        console.warn("YouTube player oluşturulamadı:", error)
       }
     }
 
-    if (window.YT?.Player) {
-      buildPlayer()
-      return
-    }
-
-    const existingReady = window.onYouTubeIframeAPIReady
-    window.onYouTubeIframeAPIReady = () => {
-      existingReady?.()
+    const handleApiReady = () => {
+      if (cancelled) return
       ytReadyRef.current = true
       buildPlayer()
     }
-  }, [setYoutubeVolume, youtubeEmbedUrl])
+
+    if (window.YT?.Player) {
+      handleApiReady()
+    } else {
+      // Başka bir bileşenin tanımladığı callback'i de koru.
+      const previousCallback = window.onYouTubeIframeAPIReady
+      window.onYouTubeIframeAPIReady = () => {
+        if (typeof previousCallback === "function") previousCallback()
+        handleApiReady()
+      }
+
+      let script = document.getElementById("youtube-iframe-api") as HTMLScriptElement | null
+      if (!script) {
+        script = document.createElement("script")
+        script.id = "youtube-iframe-api"
+        script.src = "https://www.youtube.com/iframe_api"
+        script.async = true
+        document.head.appendChild(script)
+      }
+    }
+
+    return () => {
+      cancelled = true
+      ytReadyRef.current = false
+      ytPlayerBuiltForUrlRef.current = ""
+
+      const player = playerInstance || ytPlayerRef.current
+      if (player && typeof player.destroy === "function") {
+        try {
+          player.destroy()
+        } catch {
+          // ignore
+        }
+      }
+
+      if (ytPlayerRef.current === player) {
+        ytPlayerRef.current = null
+      }
+    }
+  }, [setYoutubeVolume, youtubePlayerUrl])
 
   // Volume'ü YouTube player'a bas
   useEffect(() => {
@@ -274,13 +355,11 @@ const ytPlayerRef = useRef<{
 
   // Timer start/stop'a göre YouTube play/pause
   useEffect(() => {
-    if (!youtubeEmbedUrl || !youtubeEmbedUrl.trim()) return
+    if (!youtubePlayerUrl || !youtubePlayerUrl.trim()) return
 
-    if (!ytPlayerRef.current) return
+    if (!ytReadyRef.current || !ytPlayerRef.current) return
 
-    if (shouldPlayYoutube && (ytPlayerBuiltForUrlRef.current !== youtubeEmbedUrl)) {
-      ytPlayerBuiltForUrlRef.current = youtubeEmbedUrl
-    }
+    if (ytPlayerBuiltForUrlRef.current !== youtubePlayerUrl) return
 
     try {
       if (shouldPlayYoutube) {
@@ -291,7 +370,7 @@ const ytPlayerRef = useRef<{
     } catch {
       // ignore
     }
-  }, [shouldPlayYoutube, youtubeEmbedUrl])
+  }, [shouldPlayYoutube, youtubePlayerUrl])
 
   useEffect(() => {
     if (!isRunning || !bgSoundOn) {
@@ -327,7 +406,7 @@ const ytPlayerRef = useRef<{
     if (!isRunning) return
 
     const timeoutId = setTimeout(() => {
-      setSecondsLeft((prev:number) => {
+      setSecondsLeft((prev: number) => {
         if (prev <= 1) {
           endSessionRef.current?.()
           return prev
@@ -339,7 +418,7 @@ const ytPlayerRef = useRef<{
     return () => clearTimeout(timeoutId)
   }, [isRunning, secondsLeft])
 
-  const sendBrowserNotification = useCallback((message:string) => {
+  const sendBrowserNotification = useCallback((message: string) => {
     if (typeof window === "undefined" || !("Notification" in window)) return
     if (Notification.permission === "granted") {
       new Notification(message)
@@ -347,7 +426,7 @@ const ytPlayerRef = useRef<{
   }, [])
 
   const playTone = useCallback(
-    (frequency: number, duration: number = 0.16, type: OscillatorType = "sine") => {
+    (frequency: number, duration = 0.16, type: OscillatorType = "sine") => {
       if (!soundOn) return
       if (typeof window === "undefined") return
 
@@ -355,9 +434,9 @@ const ytPlayerRef = useRef<{
         const AudioContext = window.AudioContext || window.webkitAudioContext
         const audioCtx = new AudioContext()
         const oscillator = audioCtx.createOscillator()
-        oscillator.type = type
         const gainNode = audioCtx.createGain()
 
+        oscillator.type = type
         oscillator.frequency.value = frequency
         oscillator.connect(gainNode)
         gainNode.connect(audioCtx.destination)
@@ -385,7 +464,7 @@ const ytPlayerRef = useRef<{
             // ignore
           }
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn("Ses oynatılamadı", error)
       }
     },
@@ -393,7 +472,7 @@ const ytPlayerRef = useRef<{
   )
 
   const playSound = useCallback(
-    (type: "warning" | "chime" | "soft" | "digital" | "work" | "break") => {
+    (type: SoundKey) => {
       if (!soundOn) return
 
       if (type === "warning") {
@@ -438,7 +517,7 @@ const ytPlayerRef = useRef<{
     [playTone, soundOn]
   )
 
-  const applyPreset = (presetKey:keyof typeof PRESETS) => {
+  const applyPreset = (presetKey: PresetKey) => {
     const preset = PRESETS[presetKey]
     setMode(presetKey)
     setWorkMinutes(preset.work)
@@ -459,13 +538,38 @@ const ytPlayerRef = useRef<{
     setIsRunning(false)
   }
 
+  const handleRunningToggle = () => {
+    const willStart = !isRunning
+    const shouldStartYoutube = willStart && isWorkSession && bgSoundOn && !!youtubeEmbedUrl
+
+    // Durumu effect beklemeden güncelle: oynatıcı henüz yükleniyorsa onReady bunu kullanır.
+    shouldPlayYoutubeRef.current = shouldStartYoutube
+
+    // playVideo çağrısını doğrudan kullanıcı tıklamasında yap.
+    if (youtubeEmbedUrl && bgSoundOn && isWorkSession && ytReadyRef.current && ytPlayerRef.current) {
+      try {
+        if (willStart) {
+          ytPlayerRef.current.unMute()
+          ytPlayerRef.current.setVolume(Math.round(Math.max(0, Math.min(1, ambientVolume)) * 100))
+          ytPlayerRef.current.playVideo()
+        } else {
+          ytPlayerRef.current.pauseVideo()
+        }
+      } catch (error: unknown) {
+        console.warn("YouTube playback command failed:", error)
+      }
+    }
+
+    setIsRunning(willStart)
+  }
+
   const endSession = useCallback(() => {
     if (isWorkSession) {
       const completedAt = new Date().toISOString()
       const nextCycle = cycleCount + 1
       const nextBreak = nextCycle >= 4 ? longBreakMinutes : shortBreakMinutes
       const isLongBreak = nextCycle >= 4
-      setCompletedPomodoros((prev) =>
+      setCompletedPomodoros((prev: CompletedPomodoro[]) =>
         [
           {
             id: `${completedAt}-${prev.length}`,
@@ -515,7 +619,7 @@ const ytPlayerRef = useRef<{
     ambientAudioRef.current.currentTime = 0
   }
 
-  const smoothSetAmbientVolume = useCallback((targetVolume:number) => {
+  const smoothSetAmbientVolume = useCallback((targetVolume: number) => {
     const audio = ambientAudioRef.current
     if (!audio) return
 
@@ -532,7 +636,7 @@ const ytPlayerRef = useRef<{
 
     if (ambientVolumeRafRef.current) cancelAnimationFrame(ambientVolumeRafRef.current)
 
-    const tick = (t:number) => {
+    const tick = (t: number) => {
       const elapsed = t - start
       const p = Math.min(1, elapsed / duration)
       const eased = p * p * (3 - 2 * p)
@@ -584,9 +688,9 @@ const ytPlayerRef = useRef<{
 
       const playPromise = ambientAudioRef.current.play()
       if (playPromise !== undefined) {
-        playPromise.catch((error) => console.warn("Ambient audio playback error", error))
+        playPromise.catch((error: unknown) => console.warn("Ambient audio playback error", error))
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn("Ambient sound setup error", error)
     }
   }
@@ -618,7 +722,7 @@ const ytPlayerRef = useRef<{
   useEffect(() => {
     if (!isRunning) return
     const intervalId = setInterval(() => {
-      setMottoIndex((prev) => prev + 1)
+      setMottoIndex((prev: number) => prev + 1)
     }, 6000)
 
     return () => clearInterval(intervalId)
@@ -649,14 +753,24 @@ const ytPlayerRef = useRef<{
       <iframe
         id="youtube-ambient-iframe"
         key={youtubeIframeKey}
-        width="0"
-        height="0"
-        src={youtubeEmbedUrl || ""}
-        title="YouTube Ambient"
-        allow="autoplay; encrypted-media"
+        width="200"
+        height="200"
+        src={youtubePlayerUrl || ""}
+        title="YouTube arka plan sesi"
+        allow="autoplay; encrypted-media; picture-in-picture"
         referrerPolicy="strict-origin-when-cross-origin"
-        allowFullScreen
-        style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
+        style={{
+          position: "fixed",
+          width: "200px",
+          height: "200px",
+          left: "-10000px",
+          top: 0,
+          opacity: 0,
+          pointerEvents: "none",
+          border: 0
+        }}
+        tabIndex={-1}
+        aria-hidden="true"
       />
 
       <div className="focus-wave focus-wave--work" aria-hidden="true" />
@@ -686,7 +800,7 @@ const ytPlayerRef = useRef<{
                 <input
                   type="checkbox"
                   checked={soundOn}
-                  onChange={() => setSoundOn((prev) => !prev)}
+                  onChange={() => setSoundOn((prev: boolean) => !prev)}
                   className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-blue-500 focus:ring-blue-400"
                 />
                 Ses efektleri (Sound effects)
@@ -696,18 +810,18 @@ const ytPlayerRef = useRef<{
                 <input
                   type="checkbox"
                   checked={bgSoundOn}
-                  onChange={() => setBgSoundOn((prev:boolean) => !prev)}
+                  onChange={() => setBgSoundOn((prev: boolean) => !prev)}
                   className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-blue-500 focus:ring-blue-400"
                 />
                 Arka plan sesi (Background sound)
               </label>
 
               <div className="flex flex-wrap gap-2 sm:gap-3">
-                {Object.keys(PRESETS).map((preset) => (
+                {(Object.keys(PRESETS) as PresetKey[]).map((preset) => (
                   <button
                     key={preset}
                     type="button"
-                    onClick={() => applyPreset(preset as keyof typeof PRESETS)}
+                    onClick={() => applyPreset(preset)}
                     className={`rounded-2xl px-4 sm:px-5 py-3 text-sm font-semibold transition ${
                       mode === preset ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
                     }`}
@@ -782,7 +896,7 @@ const ytPlayerRef = useRef<{
             <div className="mt-8 flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={() => setIsRunning((prev) => !prev)}
+                onClick={handleRunningToggle}
                 className="flex-1 sm:flex-none rounded-2xl bg-blue-500 px-6 py-3 font-semibold text-white hover:bg-blue-400"
               >
                 {isRunning ? "Duraklat (Pause)" : "Başlat (Start)"}
@@ -851,7 +965,7 @@ const ytPlayerRef = useRef<{
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-white/3] px-4 py-6 text-center text-sm text-zinc-400">
+                <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.03] px-4 py-6 text-center text-sm text-zinc-400">
                   İlk çalışma oturumunu tamamladığında burada görünecek. (It will appear here after your first work session.)
                 </div>
               )}
@@ -984,7 +1098,20 @@ const ytPlayerRef = useRef<{
                     }
 
                     if (youtubeEmbedUrl) {
-                      addNotification("YouTube sesi zamanlayıcı başlayınca çalar. (YouTube sound plays when the timer starts.)", "info", 3000)
+                      if (!ytPlayerRef.current || !ytReadyRef.current) {
+                        addNotification("YouTube oynatıcısı henüz hazır değil. Birkaç saniye sonra tekrar dene.", "warning", 3000)
+                        return
+                      }
+                      try {
+                        ytPlayerRef.current.unMute()
+                        ytPlayerRef.current.setVolume(Math.round(Math.max(0, Math.min(1, ambientVolume)) * 100))
+                        ytPlayerRef.current.playVideo()
+                        shouldPlayYoutubeRef.current = true
+                        addNotification("YouTube arka plan sesi başlatılıyor.", "info", 3000)
+                      } catch (error: unknown) {
+                        console.warn("YouTube test playback failed:", error)
+                        addNotification("YouTube sesi başlatılamadı. Tarayıcı oynatmayı engellemiş olabilir.", "error", 3500)
+                      }
                       return
                     }
 
@@ -1001,7 +1128,15 @@ const ytPlayerRef = useRef<{
                 </button>
                 <button
                   type="button"
-                  onClick={stopAmbientSound}
+                  onClick={() => {
+                    stopAmbientSound()
+                    shouldPlayYoutubeRef.current = false
+                    try {
+                      ytPlayerRef.current?.pauseVideo()
+                    } catch {
+                      // ignore
+                    }
+                  }}
                   className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-200 hover:bg-zinc-700"
                 >
                   Sesi Durdur (Stop Sound)
@@ -1034,3 +1169,4 @@ const ytPlayerRef = useRef<{
 }
 
 export default Focus
+
